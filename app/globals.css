@@ -1,26 +1,94 @@
-@import "tailwindcss";
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ---------- CUSTOM COMPONENTS LAYER ---------- */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer components {
+  .font-anybody {
+    font-family: var(--font-anybody), sans-serif;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  .nav-blur {
+    @apply bg-black/80 backdrop-blur-sm border-b border-white/10;
+  }
+
+  .hero-overlay {
+    @apply absolute inset-0 bg-black/40;
+  }
+
+  .hero-title {
+    @apply font-anybody font-extrabold uppercase text-white leading-[0.85] text-center;
+  }
+
+  .hero-cta {
+    @apply absolute bottom-8 right-8 bg-[#D7F000] px-5 py-2 rounded-full text-black font-semibold text-xs sm:text-sm tracking-[0.08em] z-20;
   }
 }
 
+/* ---------- ROOT + BODY ---------- */
+
+:root {
+  --nav-height: 72px;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #000;
+  color: #fff;
+}
+
+/* === HERO LOADER (iris / eye open) === */
+
+.hero-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  pointer-events: none;
+  animation: hero-iris-open 1.4s ease-in-out forwards;
+}
+
+/* эффект "глаза": чёрная маска сжимается в точку */
+@keyframes hero-iris-open {
+  from {
+    clip-path: circle(150% at 50% 50%);
+  }
+  to {
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+/* === HERO TITLE ANIMATION === */
+
+.hero-title {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: hero-title-in 0.9s ease-out 0.7s forwards;
+}
+
+@keyframes hero-title-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === HERO CTA BUTTON ANIMATION === */
+
+.hero-cta {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: hero-cta-in 0.8s ease-out 1s forwards;
+}
+
+@keyframes hero-cta-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.font-anybody {
+  font-family: var(--font-anybody), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
