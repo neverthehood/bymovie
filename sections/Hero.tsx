@@ -108,13 +108,16 @@ export default function Hero() {
 
         {/* VIDEO */}
         <video
-          src="/assets/video/hero.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+  autoPlay
+  loop
+  muted
+  playsInline
+  className="absolute inset-0 h-full w-full object-cover"
+>
+  <source src="/assets/video/hero.webm" type="video/webm" />
+  <source src="/assets/video/hero.mp4" type="video/mp4" />
+</video>
+
 
         {/* DARK OVERLAY */}
         <div className="absolute inset-0 bg-black/40" />
