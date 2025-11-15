@@ -126,10 +126,7 @@ export default function Hero() {
         <div className="relative z-20 flex h-full flex-col items-center justify-center px-4">
           <h1
             ref={titleRef}
-            className="font-anybody text-center font-extrabold uppercase leading-[0.9]
-                       text-white text-[40px] sm:text-[64px] md:text-[88px] lg:text-[110px]
-                       xl:text-[130px] max-w-[1600px] mx-auto"
-          >
+            className="font-anybody text-center font-extrabold uppercase leading-[0.9] text-white text-[40px] sm:text-[64px] md:text-[88px] lg:text-[110px] xl:text-[130px] max-w-[1600px] mx-auto">
             <span className="block">THE FUTURE OF</span>
             <span className="block">MEDIA PRODUCTION</span>
             <span className="block">IS ALREADY HERE</span>
@@ -139,9 +136,7 @@ export default function Hero() {
         {/* BUTTON */}
         <button
           ref={buttonRef}
-          className="absolute bottom-8 right-8 z-50 rounded-full bg-[#D7F000] px-6 py-2
-                     text-xs font-semibold uppercase tracking-[0.18em] text-black"
-        >
+          className="absolute bottom-8 right-8 z-50 rounded-full bg-[#D7F000] px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-black">
           BY MOVIE VP PAVILION
         </button>
 
@@ -154,9 +149,7 @@ export default function Hero() {
           />
           <div
             ref={bottomMaskRef}
-            className="absolute left-1/2 -translate-x-1/2 bottom-[-30vh]
-                       w-[160vw] h-[80vh] bg-black rounded-t-[40%] blur-[18px]"
-          />
+            className="absolute left-1/2 -translate-x-1/2 bottom-[-30vh] w-[160vw] h-[80vh] bg-black rounded-t-[40%] blur-[18px]"/>
         </div>
       </div>
 
@@ -191,9 +184,7 @@ export default function Hero() {
 
         <button
           ref={mButton}
-          className="absolute bottom-6 right-6 z-[999] rounded-full bg-[#D7F000]
-                     px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-black"
-        >
+          className="absolute bottom-6 right-6 z-[999] rounded-full bg-[#D7F000] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-black">
           BY MOVIE VP PAVILION
         </button>
 
@@ -201,9 +192,7 @@ export default function Hero() {
         <div ref={mWrapper} className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
           <div
             ref={mTopMask}
-            className="absolute left-1/2 -translate-x-1/2 top-[-26vh]
-                       w-[200vw] h-[50vh] bg-black rounded-b-[30%] blur-[14px]"
-          />
+            className="absolute left-1/2 -translate-x-1/2 top-[-26vh] w-[200vw] h-[50vh] bg-black rounded-b-[30%] blur-[14px]"/>
           <div
             ref={mBottomMask}
             className="absolute left-1/2 -translate-x-1/2 bottom-[-26vh]
