@@ -37,26 +37,6 @@ body {
   color: #fff;
 }
 
-/* === HERO LOADER (iris / eye open) === */
-
-.hero-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: #000;
-  pointer-events: none;
-  animation: hero-iris-open 1.4s ease-in-out forwards;
-}
-
-/* эффект "глаза": чёрная маска сжимается в точку */
-@keyframes hero-iris-open {
-  from {
-    clip-path: circle(150% at 50% 50%);
-  }
-  to {
-    clip-path: circle(0% at 50% 50%);
-  }
-}
 
 /* === HERO TITLE ANIMATION === */
 
