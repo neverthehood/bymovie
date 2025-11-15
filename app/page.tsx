@@ -1,32 +1,25 @@
-﻿"use client";
-
-import { useState } from "react";
-import Loader from "@/components/Loader";
-import Navbar from "@/components/Navbar";
+﻿import Navbar from "@/components/Navbar";
 import Hero from "@/sections/Hero";
-import WeAre from "@/sections/WeAre";   // ← ВАЖНО
+import WeAre from "@/sections/WeAre"; // ← ТВОЯ СЕКЦИЯ
 
 export default function Home() {
-  const [isLoaded, setIsLoaded] = useState(false);
-
   return (
     <main className="relative w-full bg-black text-white">
-      {!isLoaded && <Loader onFinished={() => setIsLoaded(true)} />}
+      {/* Навигация */}
+      <Navbar />
 
-      {isLoaded && (
-        <>
-          <Navbar />
-          <Hero />
+      {/* Hero Section */}
+      <Hero />
 
-          {/* ОБЯЗАТЕЛЬНЫЙ промежуточный зазор */}
-          <div className="h-[20vh]" />
+      {/* We Are Section (с фиксацией скролла и закрашиванием слов) */}
+      <WeAre />
 
-          <WeAre />  {/* ← ЭТОТ БЛОК ОБЯЗАТЕЛЕН */}
-
-          {/* Для теста можно добавить ещё что-то... */}
-          <div className="h-[200vh]" />
-        </>
-      )}
+      {/* 
+        ↓↓↓ сюда пойдут следующие секции сайта:
+        <Services />
+        <Projects />
+        <Contacts />
+      */}
     </main>
   );
 }

@@ -1,73 +1,67 @@
 "use client";
 
-import { useRef, useLayoutEffect } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function WeAre() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
-  const textRef = useRef<HTMLDivElement | null>(null);
 
-  useLayoutEffect(() => {
-    if (!sectionRef.current || !textRef.current) return;
+  const text =
+    "We are BY Movie, a full-service studio in the world of virtual media production. Over 10 years we work at the intersection of technology and visual art.";
 
-    const ctx = gsap.context(() => {
-      const text = textRef.current!;
-      const letters: HTMLElement[] = [];
+  useEffect(() => {
+    if (!sectionRef.current) return;
 
-      // Split into spans
-      text.querySelectorAll("p").forEach((p) => {
-        const chars = p.textContent!
-          .split("")
-          .map((c) => `<span class="letter inline-block opacity-20">${c}</span>`)
-          .join("");
+    const words = sectionRef.current.querySelectorAll(".word");
 
-        p.innerHTML = chars;
-      });
+    // Mobile detection
+    const isMobile = window.innerWidth < 768;
 
-      text.querySelectorAll(".letter").forEach((l) =>
-        letters.push(l as HTMLElement)
-      );
-
-      gsap.to(letters, {
-        color: "#ffffff",
-        opacity: 1,
-        stagger: 0.004,
+    gsap.fromTo(
+      words,
+      { color: "rgba(255,255,255,0.15)" },
+      {
+        color: "rgba(255,255,255,1)",
+        stagger: isMobile ? 0.20 : 0.12,
         ease: "none",
         scrollTrigger: {
-  trigger: sectionRef.current,
-  start: "top top+=100",   // ← очень важно
-  end: "bottom+=200% top",
-  scrub: true,
-  pin: true,
-  pinSpacing: true,
-},
-
-      });
-    });
-
-    return () => ctx.revert();
+          trigger: sectionRef.current,
+          start: "center center",
+          end: isMobile ? "+=70%" : "+=120%",
+          scrub: true,
+          pin: true,
+        },
+      }
+    );
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen bg-black text-white flex items-center justify-center px-6"
+      className="
+        w-full min-h-screen
+        flex items-center justify-center
+        bg-black px-4
+      "
     >
-      <div ref={textRef} className="max-w-[1000px] text-center leading-tight">
-        <p className="text-[32px] md:text-[52px] font-light opacity-20">
-          WE ARE A CREATIVE TEAM WORKING AT THE CROSSROADS OF TECHNOLOGY AND CINEMA.
-        </p>
-
-        <p className="mt-10 text-[32px] md:text-[52px] font-light opacity-20">
-          WE DESIGN FUTURE-PROOF MEDIA PIPELINES AND IMMERSIVE VISUAL EXPERIENCES.
-        </p>
-
-        <p className="mt-10 text-[32px] md:text-[52px] font-light opacity-20">
-          WE BUILD THE NEW ERA OF MEDIA PRODUCTION.
-        </p>
+      <div
+        className="
+          mx-auto text-center font-anybody
+          leading-[1.2] tracking-tight
+          max-w-[850px] md:text-[58px] text-[26px]
+        "
+      >
+        {text.split(" ").map((w, i) => (
+          <span
+            key={i}
+            className="word inline-block mr-[0.28em]"
+          >
+            {w}
+          </span>
+        ))}
       </div>
     </section>
   );
