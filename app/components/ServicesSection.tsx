@@ -140,15 +140,18 @@ export default function ServicesSection() {
       <div className="absolute bottom-12 left-12 z-20 flex flex-col gap-2">
         {services.map((s, i) => (
           <div
-            key={s.title}
-            ref={(el) => (titleRefs.current[i] = el)}
-            onClick={() => clickItem(i)}
-            className={`cursor-pointer text-3xl md:text-4xl font-bold uppercase tracking-tight transition-all duration-300 ${
-              i === active ? "text-[#D7F000]" : "text-white/15"
-            }`}
-          >
-            {s.title}
-          </div>
+  key={s.title}
+  ref={(el) => {
+    titleRefs.current[i] = el;
+  }}
+  onClick={() => clickItem(i)}
+  className={`cursor-pointer text-3xl md:text-4xl font-bold uppercase tracking-tight transition-all duration-300 ${
+    i === active ? "text-[#D7F000]" : "text-white/15"
+  }`}
+>
+  {s.title}
+</div>
+
         ))}
       </div>
 
