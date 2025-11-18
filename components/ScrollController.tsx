@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ScrollContext } from "./ScrollContext";
 import gsap from "gsap";
-
-// импортируем, но регистрируем только в браузере
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { DISABLE_AUTOSCROLL } from "@/app/config";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function ScrollController({
   children,
@@ -14,41 +17,27 @@ export default function ScrollController({
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isAutoRef = useRef(false);
-  const [current, setCurrent] = useState(0);
 
-  const SNAP_LIMIT = 3;
-
-  // мягкий ease
+  // плавный easing
   const ease = (x: number) => -(Math.cos(Math.PI * x) - 1) / 2;
 
-  const scrollToSection = (index: number) => {
-    const root = containerRef.current;
-    if (!root) return;
-
-    const sections = Array.from(
-      root.querySelectorAll<HTMLElement>("section[data-scroll]")
-    );
-
-    const target = sections[index];
-    if (!target) return;
-
+  const smoothScrollTo = (y: number) => {
     const start = window.scrollY;
-    const end = target.offsetTop;
-    const duration = 550;
+    const duration = 350;
     const t0 = performance.now();
 
     isAutoRef.current = true;
 
     const step = (now: number) => {
       const t = Math.min(1, (now - t0) / duration);
-      const y = start + (end - start) * ease(t);
+      const v = start + (y - start) * ease(t);
 
-      window.scrollTo(0, y);
+      window.scrollTo(0, v);
 
-      if (t < 1) requestAnimationFrame(step);
-      else {
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
         isAutoRef.current = false;
-        setCurrent(index);
       }
     };
 
@@ -56,43 +45,53 @@ export default function ScrollController({
   };
 
   useEffect(() => {
-    // ⛔️ Регистрируем ScrollTrigger только на клиенте
-    if (typeof window !== "undefined") {
-      gsap.registerPlugin(ScrollTrigger);
-    }
-
     const handler = (e: WheelEvent) => {
-      if (isAutoRef.current) {
-        e.preventDefault();
-        return;
-      }
+  if (isAutoRef.current) {
+    e.preventDefault();
+    return;
+  }
 
-      const root = containerRef.current;
-      if (!root) return;
+  // ❗ если ЛЮБОЙ ScrollTrigger pinned — запрещаем автоскролл
+  const pinnedActive = ScrollTrigger.getAll().some(
+    (t) => t.pin && t.isActive
+  );
 
-      // безопасная проверка ScrollTrigger
-      const weArePin = ScrollTrigger.getById?.("weare-pin");
+  if (pinnedActive) {
+    // даём секции самой обработать scroll
+    return;
+  }
 
-      if (current === 1 && weArePin?.isActive) {
-        return;
-      }
+  const root = containerRef.current;
+  if (!root) return;
 
-      const direction = e.deltaY > 0 ? 1 : -1;
-      const next = current + direction;
+  const sections = Array.from(
+    root.querySelectorAll<HTMLElement>("section[data-scroll]")
+  );
+  if (sections.length < 2) return;
 
-      if (current >= SNAP_LIMIT) return;
-      if (next < 0 || next > SNAP_LIMIT) return;
+  const hero = sections[0];
+  const weAre = sections[1];
 
-      e.preventDefault();
-      scrollToSection(next);
-    };
+  const scrollY = window.scrollY;
+  const heroStopZone = hero.offsetTop + hero.offsetHeight * 0.55;
+
+  // HERO → WEARE автодоскролл
+  if (scrollY < heroStopZone && e.deltaY > 0) {
+    e.preventDefault();
+    smoothScrollTo(weAre.offsetTop);
+    return;
+  }
+
+  // Остальное — нативный скролл
+};
+
 
     window.addEventListener("wheel", handler, { passive: false });
     return () => window.removeEventListener("wheel", handler as any);
-  }, [current]);
+  }, []);
 
   return (
-    <ScrollContext.Provider value={current}>
+    <ScrollContext.Provider value={0}>
       <div ref={containerRef}>{children}</div>
     </ScrollContext.Provider>
   );

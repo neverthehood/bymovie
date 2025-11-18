@@ -2,9 +2,12 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { services } from "@/app/data/servicesData";
 
-export default function ServicesSection({ isFocused = false }) {
+gsap.registerPlugin(ScrollTrigger);
+
+export default function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const videoTrackRef = useRef<HTMLDivElement | null>(null);
   const subtitleRef = useRef<HTMLDivElement | null>(null);
@@ -13,15 +16,32 @@ export default function ServicesSection({ isFocused = false }) {
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const isAnimating = useRef(false);
+  const [canExit, setCanExit] = useState(false);
 
-  const [canExit, setCanExit] = useState(false); // ← флажок "можно ли уже выйти из секции"
-
-  const firstPauseMultiplier = 0.4;
   const total = services.length;
 
-  // ——————————————————————————
-  // Mobile detect
-  // ——————————————————————————
+  // --------------------------------------------------------
+  // FIX №1 — правильная высота секции = точно во весь экран
+  // --------------------------------------------------------
+  useLayoutEffect(() => {
+    if (!sectionRef.current) return;
+
+    // фиксируем секцию ЧЁТКО как отдельный экран
+    const st = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      end: "+=1000", // длина фиксации, можно регулировать
+      pin: true,
+      pinSpacing: true,
+      scrub: false,
+    });
+
+    return () => st.kill();
+  }, []);
+
+  // --------------------------------------------------------
+  // MOBILE detect
+  // --------------------------------------------------------
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -29,16 +49,13 @@ export default function ServicesSection({ isFocused = false }) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // при смене пункта — сбрасываем "разрешение на выход"
   useEffect(() => {
-    if (active < total - 1) {
-      setCanExit(false);
-    }
+    if (active < total - 1) setCanExit(false);
   }, [active, total]);
 
-  // ——————————————————————————
-  // Позиционирование сабтайтла
-  // ——————————————————————————
+  // --------------------------------------------------------
+  // Subtitle positioning
+  // --------------------------------------------------------
   const positionSubtitle = (index: number) => {
     if (isMobile) return;
     if (!subtitleRef.current || !titleRefs.current[index] || !sectionRef.current) return;
@@ -53,9 +70,9 @@ export default function ServicesSection({ isFocused = false }) {
     });
   };
 
-  // ——————————————————————————
-  // Анимация видео
-  // ——————————————————————————
+  // --------------------------------------------------------
+  // Video animation
+  // --------------------------------------------------------
   useLayoutEffect(() => {
     if (!videoTrackRef.current) return;
 
@@ -69,72 +86,67 @@ export default function ServicesSection({ isFocused = false }) {
     });
 
     positionSubtitle(active);
-  }, [active, isMobile]);
+  }, [active]);
 
-  // ——————————————————————————
-  // Скролл на десктопе
-  // ——————————————————————————
+  // --------------------------------------------------------
+  // Scroll logic INSIDE pinned block
+  // --------------------------------------------------------
   useEffect(() => {
-  if (!sectionRef.current) return;
-  const el = sectionRef.current;
+    const el = sectionRef.current;
+    if (!el) return;
 
-  const handleWheel = (event: WheelEvent) => {
-    if (isMobile) return;
+    const onWheel = (event: WheelEvent) => {
+      if (isMobile) return;
 
-    const delta = event.deltaY;
+      const delta = event.deltaY;
 
-    // 1. Если анимация ещё идёт — не выпускаем наружу
-    if (isAnimating.current) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-
-    // 2. Внутренний скролл — двигаем пункты
-    if (delta > 0) {
-      // Листаем вниз
-      if (active < total - 1) {
-        isAnimating.current = true;
+      // блок во время анимации
+      if (isAnimating.current) {
         event.preventDefault();
-        event.stopPropagation();
-        setActive((p) => p + 1);
         return;
       }
 
-      // На последнем пункте
-      if (!canExit) {
-        // Первый жест вниз — разрешаем выход
-        setCanExit(true);
-        event.preventDefault();
-        event.stopPropagation();
+      // вниз
+      if (delta > 0) {
+        if (active < total - 1) {
+          event.preventDefault();
+          isAnimating.current = true;
+          setActive((p) => p + 1);
+          return;
+        }
+
+        if (!canExit) {
+          event.preventDefault();
+          setCanExit(true);
+          return;
+        }
+
+        // canExit === true → выпускаем наружу
         return;
       }
 
-      // canExit === true → выпускаем наружу (не трогаем event)
-      return;
-    } else {
-      // Листаем вверх
-      if (active > 0) {
-        isAnimating.current = true;
-        event.preventDefault();
-        event.stopPropagation();
-        setActive((p) => p - 1);
+      // вверх
+      if (delta < 0) {
+        if (active > 0) {
+          event.preventDefault();
+          isAnimating.current = true;
+          setActive((p) => p - 1);
+          return;
+        }
+
+        // active === 0 → выпустить наверх
         return;
       }
+    };
 
-      // если active === 0 → выпускаем наружу
-      return;
-    }
-  };
+    // ❗ важнейшее: НЕ capture!
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel as any);
+  }, [active, canExit, isMobile, total]);
 
-  el.addEventListener("wheel", handleWheel, { passive: false, capture: true });
-  return () => el.removeEventListener("wheel", handleWheel, { capture: true } as any);
-}, [active, isMobile, total, canExit]);
-
-
-  // ——————————————————————————
-  // Клик по пункту
-  // ——————————————————————————
+  // --------------------------------------------------------
+  // Clicks
+  // --------------------------------------------------------
   const clickItem = (i: number) => {
     if (i === active || isAnimating.current) return;
     isAnimating.current = true;
@@ -144,22 +156,14 @@ export default function ServicesSection({ isFocused = false }) {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden bg-black"
+      className="relative w-full min-h-screen overflow-hidden bg-black"
+      data-scroll
     >
-      {/* VIDEO STACK */}
-      <div
-        ref={videoTrackRef}
-        className="absolute inset-0 flex flex-col h-full w-full"
-      >
+      {/* VIDEO TRACK */}
+      <div ref={videoTrackRef} className="absolute inset-0 flex flex-col h-full w-full">
         {services.map((service) => (
           <div key={service.title} className="h-full w-full flex-shrink-0">
-            <video
-              className="h-full w-full object-cover"
-              muted
-              loop
-              autoPlay
-              playsInline
-            >
+            <video className="h-full w-full object-cover" muted loop autoPlay playsInline>
               <source src={service.webm} type="video/webm" />
               <source src={service.mp4} type="video/mp4" />
             </video>
@@ -169,21 +173,18 @@ export default function ServicesSection({ isFocused = false }) {
 
       <div className="absolute inset-0 bg-black/45 pointer-events-none" />
 
-      {/* СПИСОК СЕРВИСОВ */}
-      <div className="absolute bottom-12 left-4 right-4 md:left-12 md:right-auto z-20 flex flex-col gap-2">
+      {/* TITLES */}
+      <div className="absolute bottom-12 left-4 right-4 md:left-12 z-20 flex flex-col gap-2">
         {services.map((s, i) => (
           <div
             key={s.title}
-            ref={(el) => {
-              titleRefs.current[i] = el;
-            }}
+            ref={(el) => (titleRefs.current[i] = el)}
             onClick={() => clickItem(i)}
             className={`cursor-pointer text-3xl md:text-4xl font-bold uppercase tracking-tight transition-all duration-300 ${
               i === active ? "text-[#D7F000]" : "text-white/15"
             }`}
           >
             {s.title}
-
             {isMobile && i === active && (
               <div className="mt-2 text-white/85 text-base leading-snug">
                 {s.subtitle}
@@ -193,7 +194,7 @@ export default function ServicesSection({ isFocused = false }) {
         ))}
       </div>
 
-      {/* SUBTITLE (DESKTOP) */}
+      {/* DESKTOP SUBTITLE */}
       {!isMobile && (
         <div
           ref={subtitleRef}
