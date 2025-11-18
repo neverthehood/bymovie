@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 
@@ -12,30 +12,36 @@ export default function WeAre() {
   const text =
     "We are BY Movie, a full-service studio in the world of virtual media production. Over 10 years we work at the intersection of technology and visual art.";
 
-  useEffect(() => {
-    if (!sectionRef.current) return;
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
 
-    const words = sectionRef.current.querySelectorAll(".word");
+    const words = section.querySelectorAll<HTMLElement>(".word");
+    if (!words.length) return;
 
-    // Mobile detection
     const isMobile = window.innerWidth < 768;
 
-    gsap.fromTo(
-      words,
-      { color: "rgba(255,255,255,0.15)" },
-      {
-        color: "rgba(255,255,255,1)",
-        stagger: isMobile ? 0.20 : 0.12,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "center center",
-          end: isMobile ? "+=70%" : "+=120%",
-          scrub: true,
-          pin: true,
-        },
-      }
-    );
+    // GSAP CONTEXT
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        words,
+        { color: "rgba(255,255,255,0.15)" },
+        {
+          color: "rgba(255,255,255,1)",
+          stagger: isMobile ? 0.20 : 0.12,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: isMobile ? "+=70%" : "+=120%",
+            scrub: true,
+            pin: true,
+          },
+        }
+      );
+    }, section);
+
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -51,7 +57,7 @@ export default function WeAre() {
         className="
           mx-auto text-center font-anybody
           leading-[1.2] tracking-tight
-          max-w-[850px] md:text-[58px] text-[26px]
+          max-w-[950px] md:text-[58px] text-[26px]
         "
       >
         {text.split(" ").map((w, i) => (
