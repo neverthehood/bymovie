@@ -178,9 +178,12 @@ export default function ServicesSection() {
         {services.map((s, i) => (
           <div
             key={s.title}
-            ref={(el) => {
+            ref={(el: HTMLDivElement | null) => {
   titleRefs.current[i] = el;
+  return undefined; // можно и так, но не нужно
 }}
+
+
 
             onClick={() => clickItem(i)}
             className={`cursor-pointer text-3xl md:text-4xl font-bold uppercase tracking-tight transition-all duration-300 ${
