@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ScrollContext } from "./ScrollContext";
+import gsap from "gsap";
 
-// Важно: ScrollTrigger используется здесь глобально,
-// он уже подключен в секциях WeAre и HowWeWork
-declare const ScrollTrigger: any;
+// импортируем, но регистрируем только в браузере
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function ScrollController({
   children,
@@ -16,40 +16,39 @@ export default function ScrollController({
   const isAutoRef = useRef(false);
   const [current, setCurrent] = useState(0);
 
-  const SNAP_LIMIT = 3; // 0 Hero, 1 WeAre, 2 Services, 3 HowWeWork
+  const SNAP_LIMIT = 3;
 
-  // Мягкий ease
+  // мягкий ease
   const ease = (x: number) => -(Math.cos(Math.PI * x) - 1) / 2;
 
-  const scrollToSection = (targetIndex: number) => {
-    const container = containerRef.current;
-    if (!container) return;
+  const scrollToSection = (index: number) => {
+    const root = containerRef.current;
+    if (!root) return;
 
     const sections = Array.from(
-      container.querySelectorAll<HTMLElement>("section[data-scroll]")
+      root.querySelectorAll<HTMLElement>("section[data-scroll]")
     );
 
-    const target = sections[targetIndex];
+    const target = sections[index];
     if (!target) return;
 
     const start = window.scrollY;
     const end = target.offsetTop;
     const duration = 550;
-    const startTime = performance.now();
+    const t0 = performance.now();
 
     isAutoRef.current = true;
 
     const step = (now: number) => {
-      const t = Math.min(1, (now - startTime) / duration);
-      const v = start + (end - start) * ease(t);
+      const t = Math.min(1, (now - t0) / duration);
+      const y = start + (end - start) * ease(t);
 
-      window.scrollTo(0, v);
+      window.scrollTo(0, y);
 
-      if (t < 1) {
-        requestAnimationFrame(step);
-      } else {
+      if (t < 1) requestAnimationFrame(step);
+      else {
         isAutoRef.current = false;
-        setCurrent(targetIndex);
+        setCurrent(index);
       }
     };
 
@@ -57,33 +56,35 @@ export default function ScrollController({
   };
 
   useEffect(() => {
+    // ⛔️ Регистрируем ScrollTrigger только на клиенте
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
     const handler = (e: WheelEvent) => {
-      // если идет автодоскролл — блокируем управление
       if (isAutoRef.current) {
         e.preventDefault();
         return;
       }
 
-      // проверяем PIN секции WeAre (чтобы не перескакивало!)
-      const weArePin = ScrollTrigger?.getById?.("weare-pin");
-      if (weArePin?.isActive) {
-        // WeAre pinned → запрещаем автолистание
+      const root = containerRef.current;
+      if (!root) return;
+
+      // безопасная проверка ScrollTrigger
+      const weArePin = ScrollTrigger.getById?.("weare-pin");
+
+      if (current === 1 && weArePin?.isActive) {
         return;
       }
 
-      const container = containerRef.current;
-      if (!container) return;
-
       const direction = e.deltaY > 0 ? 1 : -1;
-      const nextIndex = current + direction;
+      const next = current + direction;
 
-      // после HowWeWork обычный скролл
       if (current >= SNAP_LIMIT) return;
-
-      if (nextIndex < 0 || nextIndex > SNAP_LIMIT) return;
+      if (next < 0 || next > SNAP_LIMIT) return;
 
       e.preventDefault();
-      scrollToSection(nextIndex);
+      scrollToSection(next);
     };
 
     window.addEventListener("wheel", handler, { passive: false });

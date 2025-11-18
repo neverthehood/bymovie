@@ -74,21 +74,24 @@ export default function HowWeWork() {
       <div className="relative w-full overflow-hidden">
         <div className="flex gap-[16px] pl-[16px]">
           {steps.map((step, i) => (
-            <div
-              key={i}
-              ref={(el) => (cardsRef.current[i] = el)}
-              className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10 shadow-xl"
-            >
-              <div className="text-[#101010]">{/* ← исправлено */}
-                <h3 className="text-[48px] font-bold tracking-tight mb-4">
-                  {step.title}
-                </h3>
-                <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
-                  {step.desc}
-                </p>
-              </div>
-            </div>
-          ))}
+  <div
+    key={i}
+    ref={(el) => {
+      cardsRef.current[i] = el;
+    }}
+    className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10 shadow-xl"
+  >
+    <div className="text-[#101010]">
+      <h3 className="text-[48px] font-bold tracking-tight mb-4">
+        {step.title}
+      </h3>
+      <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
+        {step.desc}
+      </p>
+    </div>
+  </div>
+))}
+
         </div>
       </div>
     </section>
