@@ -17,9 +17,12 @@ const steps = [
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
   const [isMobile, setIsMobile] = useState(false);
 
+  // ----------------------------
   // Correct mobile detection
+  // ----------------------------
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -33,14 +36,18 @@ export default function HowWeWork() {
     if (!section || cards.length < 2) return;
 
     const ctx = gsap.context(() => {
-      // Kill old triggers
       ScrollTrigger.getAll().forEach((t) => t.kill());
 
-      // DESKTOP — horizontal animation
+      // -------------------------------------------------
+      // DESKTOP — horizontal overlapping animation
+      // -------------------------------------------------
       if (!isMobile) {
         const CW = 570;
         const GAP = 16;
+
+        // partial overlap (65%)
         const OVERLAP = (CW + GAP) * 0.65;
+
         const totalDistance = OVERLAP * (cards.length - 1);
         const viewport = window.innerWidth;
 
@@ -58,6 +65,7 @@ export default function HowWeWork() {
               if (i === 0) return;
 
               const rawX = -t * totalDistance;
+
               const limit =
                 -(OVERLAP * i) > -(CW * i - (viewport - CW))
                   ? -(CW * i - (viewport - CW))
@@ -66,22 +74,17 @@ export default function HowWeWork() {
               gsap.set(card, { x: Math.max(rawX, limit) });
             });
           },
-
-          // FIX PROJECTS OVERLAY
-          onLeave: () => {
-            document.querySelector("#projects")?.classList.add("pt-24");
-          },
-          onEnterBack: () => {
-            document.querySelector("#projects")?.classList.remove("pt-24");
-          },
         });
       }
 
-      // MOBILE — vertical animation
+      // -------------------------------------------------
+      // MOBILE — vertical overlapping animation
+      // -------------------------------------------------
       else {
         const CH = 260;
         const GAP = 16;
-        const OVERLAP = (CH + GAP) * 0.7;
+        const OVERLAP = (CH + GAP) * 0.7; // as per screenshot
+
         const totalDistance = OVERLAP * (cards.length - 1);
 
         ScrollTrigger.create({
@@ -102,14 +105,6 @@ export default function HowWeWork() {
 
               gsap.set(card, { y: Math.max(rawY, limit) });
             });
-          },
-
-          // FIX PROJECTS OVERLAY
-          onLeave: () => {
-            document.querySelector("#projects")?.classList.add("pt-24");
-          },
-          onEnterBack: () => {
-            document.querySelector("#projects")?.classList.remove("pt-24");
           },
         });
       }
@@ -134,9 +129,8 @@ export default function HowWeWork() {
               <div
                 key={i}
                 ref={(el) => {
-  cardsRef.current[i] = el;
-}}
-
+                  cardsRef.current[i] = el;
+                }}
                 className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10"
               >
                 <div className="text-[#101010]">
@@ -161,9 +155,8 @@ export default function HowWeWork() {
               <div
                 key={i}
                 ref={(el) => {
-  cardsRef.current[i] = el;
-}}
-
+                  cardsRef.current[i] = el;
+                }}
                 className="w-full h-[260px] bg-[#F1FF9C] px-8 py-8"
               >
                 <div className="text-[#101010]">
@@ -180,7 +173,7 @@ export default function HowWeWork() {
         </div>
       )}
 
-      {/* small spacer */}
+      {/* spacer so Projects is visible */}
       <div className="h-40 md:h-60"></div>
     </section>
   );
