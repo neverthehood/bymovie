@@ -17,10 +17,12 @@ const steps = [
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
   const [isMobile, setIsMobile] = useState(false);
 
-  const fadeValues = [1, 0.9, 0.82, 0.74, 0.66]; // C-medium
-
+  // ----------------------------
+  // Correct mobile detection
+  // ----------------------------
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -34,14 +36,13 @@ export default function HowWeWork() {
     if (!section || cards.length < 2) return;
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-
-      // ===== DESKTOP =====
+      // DESKTOP — горизонтальный режим
       if (!isMobile) {
         const CW = 570;
         const GAP = 16;
-        const OVERLAP = (CW + GAP) * 0.65;
+        const OVERLAP = (CW + GAP) * 0.65; // карточка заезжает только на 65%
         const totalDistance = OVERLAP * (cards.length - 1);
+        const viewport = window.innerWidth;
 
         ScrollTrigger.create({
           trigger: section,
@@ -51,36 +52,38 @@ export default function HowWeWork() {
           pin: true,
           pinSpacing: true,
           onUpdate: (self) => {
-  const t = self.progress;
+            const t = self.progress;
 
-  cards.forEach((card, i) => {
-    const rawX = -t * totalDistance;
-    const limit = -(OVERLAP * i);
+            cards.forEach((card, i) => {
+              if (i === 0) {
+                // первая карточка стоит, только фильтр
+                const sat = calcSaturation(t, i);
+                gsap.set(card, { x: 0, filter: `saturate(${sat})` });
+                return;
+              }
 
-    // --- ДИНАМИКА ДЛЯ ПЕРВЫХ КАРТОЧЕК ---
-    // обратный индекс
-    const depthIndex = cards.length - 1 - i;
+              const rawX = -t * totalDistance;
 
-    // снижение насыщенности
-    const saturation = 1 - t * (0.18 * depthIndex);
-    const satClamped = Math.max(0.35, saturation);
+              const lastLimit = -(CW * i - (viewport - CW));
+              const overlapLimit = -(OVERLAP * i);
+              const limit = Math.max(lastLimit, overlapLimit);
 
-    gsap.set(card, {
-      x: Math.max(rawX, limit),
-      filter: `saturate(${satClamped})`
-    });
-  });
-},
+              const sat = calcSaturation(t, i);
 
-
+              gsap.set(card, {
+                x: Math.max(rawX, limit),
+                filter: `saturate(${sat})`,
+              });
+            });
+          },
         });
       }
 
-      // ===== MOBILE =====
+      // MOBILE — вертикальный режим
       else {
         const CH = 260;
         const GAP = 16;
-        const OVERLAP = (CH + GAP) * 0.7;
+        const OVERLAP = (CH + GAP) * 0.7; // 70% перекрытия
         const totalDistance = OVERLAP * (cards.length - 1);
 
         ScrollTrigger.create({
@@ -91,25 +94,25 @@ export default function HowWeWork() {
           pin: true,
           pinSpacing: false,
           onUpdate: (self) => {
-  const t = self.progress;
+            const t = self.progress;
 
-  cards.forEach((card, i) => {
-    const rawY = -t * totalDistance;
-    const limit = -(OVERLAP * i);
+            cards.forEach((card, i) => {
+              if (i === 0) {
+                const sat = calcSaturation(t, i);
+                gsap.set(card, { y: 0, filter: `saturate(${sat})` });
+                return;
+              }
 
-    const depthIndex = cards.length - 1 - i;
+              const rawY = -t * totalDistance;
+              const limit = -(OVERLAP * i);
+              const sat = calcSaturation(t, i);
 
-    const saturation = 1 - t * (0.18 * depthIndex);
-    const satClamped = Math.max(0.35, saturation);
-
-    gsap.set(card, {
-      y: Math.max(rawY, limit),
-      filter: `saturate(${satClamped})`
-    });
-  });
-},
-
-
+              gsap.set(card, {
+                y: Math.max(rawY, limit),
+                filter: `saturate(${sat})`,
+              });
+            });
+          },
         });
       }
     }, section);
@@ -117,63 +120,79 @@ export default function HowWeWork() {
     return () => ctx.revert();
   }, [isMobile]);
 
+  // отдельная маленькая функция для насыщенности
+  const calcSaturation = (t: number, index: number) => {
+    // t: 0 → 1; index: 0,1,2...
+    // Более тёмные (менее насыщенные) — ПЕРВЫЕ карточки при продвижении скролла
+    const base = 1 - t; // чем дальше скролл, тем меньше
+    const indexOffset = index * 0.18; // дальше по списку — светлее
+    const raw = base - indexOffset; // может уйти в минус
+    const sat = 0.4 + Math.max(0, raw) * 0.6; // clamp ~ [0.4, 1.0]
+    return Math.max(0.4, Math.min(1, sat));
+  };
+
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen bg-black text-white overflow-hidden pt-40"
+      data-scroll
+      className="relative w-full min-h-screen bg-black text-white overflow-hidden pt-40 pb-0"
     >
       <h2 className="text-center text-5xl font-bold mb-20">HOW WE WORK</h2>
 
-      {/* DESKTOP */}
+      {/* DESKTOP — горизонтальный лейаут */}
       {!isMobile && (
         <div className="relative w-full overflow-hidden">
           <div className="flex gap-[16px] pl-[16px]">
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el: HTMLDivElement | null) => {
+                ref={(el) => {
                   cardsRef.current[i] = el;
                 }}
                 className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10"
               >
-                <h3 className="text-[48px] font-bold mb-4 text-[#101010]">
-                  {step.title}
-                </h3>
-                <p className="text-[20px] whitespace-pre-line text-[#101010]">
-                  {step.desc}
-                </p>
+                <div className="text-[#101010]">
+                  <h3 className="text-[48px] font-bold tracking-tight mb-4">
+                    {step.title}
+                  </h3>
+                  <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
+                    {step.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* MOBILE */}
+      {/* MOBILE — вертикальный лейаут */}
       {isMobile && (
         <div className="relative w-full overflow-hidden px-4">
           <div className="flex flex-col gap-[16px]">
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el: HTMLDivElement | null) => {
+                ref={(el) => {
                   cardsRef.current[i] = el;
                 }}
                 className="w-full h-[260px] bg-[#F1FF9C] px-8 py-8"
               >
-                <h3 className="text-[36px] font-bold mb-3 text-[#101010]">
-                  {step.title}
-                </h3>
-                <p className="text-[18px] whitespace-pre-line text-[#101010]">
-                  {step.desc}
-                </p>
+                <div className="text-[#101010]">
+                  <h3 className="text-[36px] font-bold tracking-tight mb-3">
+                    {step.title}
+                  </h3>
+                  <p className="text-[18px] whitespace-pre-line leading-tight text-[#101010]">
+                    {step.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Отступ под Projects */}
-      <div className="h-40 md:h-60"></div>
+      {/* небольшой буфер, чтобы следующие секции не прилипали впритык */}
+      <div className="h-40 md:h-60" />
     </section>
   );
 }
