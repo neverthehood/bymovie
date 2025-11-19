@@ -77,11 +77,14 @@ export default function ServicesSection() {
     if (!videoTrackRef.current) return;
 
     gsap.to(videoTrackRef.current, {
-      yPercent: -100 * active,
-      duration: 0.9,
-      ease: "power3.inOut",
-      onComplete: () => (isAnimating.current = false),
-    });
+  yPercent: -100 * active,
+  duration: 0.9,
+  ease: "power3.inOut",
+  onComplete: () => {
+    isAnimating.current = false;
+  },
+});
+
 
     positionSubtitle(active);
   }, [active]);
