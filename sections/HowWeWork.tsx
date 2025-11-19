@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -17,51 +17,106 @@ const steps = [
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Correct mobile detection
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
     if (!section || cards.length < 2) return;
 
-    const CW = 570;
-    const GAP = 16;
-    const STOP = (CW + GAP) / 2;
-    const viewport = window.innerWidth;
-
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top top",
-        end: "+=800",
-        scrub: true,
-        pin: true,
-        onUpdate: (self) => {
-          const t = self.progress;
+      // Kill old triggers
+      ScrollTrigger.getAll().forEach((t) => t.kill());
 
-          cards.forEach((card, i) => {
-            if (i === 0) return;
+      // DESKTOP — horizontal animation
+      if (!isMobile) {
+        const CW = 570;
+        const GAP = 16;
+        const OVERLAP = (CW + GAP) * 0.65;
+        const totalDistance = OVERLAP * (cards.length - 1);
+        const viewport = window.innerWidth;
 
-            // Все едут вместе
-            const rawX = -t * (STOP * (cards.length - 1));
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top top",
+          end: `+=${totalDistance}`,
+          scrub: true,
+          pin: true,
+          pinSpacing: true,
 
-            // Общее ограничение (паровозик)
-            let limit = -(STOP * i);
+          onUpdate: (self) => {
+            const t = self.progress;
+            cards.forEach((card, i) => {
+              if (i === 0) return;
 
-            // Доп. логика ДЛЯ ПОСЛЕДНЕЙ
-            if (i === cards.length - 1) {
-              const fullStop = -(CW * i - (viewport - CW));
-              limit = fullStop;
-            }
+              const rawX = -t * totalDistance;
+              const limit =
+                -(OVERLAP * i) > -(CW * i - (viewport - CW))
+                  ? -(CW * i - (viewport - CW))
+                  : -(OVERLAP * i);
 
-            const x = Math.max(rawX, limit);
-            gsap.set(card, { x });
-          });
-        },
-      });
+              gsap.set(card, { x: Math.max(rawX, limit) });
+            });
+          },
+
+          // FIX PROJECTS OVERLAY
+          onLeave: () => {
+            document.querySelector("#projects")?.classList.add("pt-24");
+          },
+          onEnterBack: () => {
+            document.querySelector("#projects")?.classList.remove("pt-24");
+          },
+        });
+      }
+
+      // MOBILE — vertical animation
+      else {
+        const CH = 260;
+        const GAP = 16;
+        const OVERLAP = (CH + GAP) * 0.7;
+        const totalDistance = OVERLAP * (cards.length - 1);
+
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top top",
+          end: `+=${totalDistance}`,
+          scrub: true,
+          pin: true,
+          pinSpacing: false,
+
+          onUpdate: (self) => {
+            const t = self.progress;
+            cards.forEach((card, i) => {
+              if (i === 0) return;
+
+              const rawY = -t * totalDistance;
+              const limit = -(OVERLAP * i);
+
+              gsap.set(card, { y: Math.max(rawY, limit) });
+            });
+          },
+
+          // FIX PROJECTS OVERLAY
+          onLeave: () => {
+            document.querySelector("#projects")?.classList.add("pt-24");
+          },
+          onEnterBack: () => {
+            document.querySelector("#projects")?.classList.remove("pt-24");
+          },
+        });
+      }
     }, section);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]);
 
   return (
     <section
@@ -71,29 +126,56 @@ export default function HowWeWork() {
     >
       <h2 className="text-center text-5xl font-bold mb-20">HOW WE WORK</h2>
 
-      <div className="relative w-full overflow-hidden">
-        <div className="flex gap-[16px] pl-[16px]">
-          {steps.map((step, i) => (
-  <div
-    key={i}
-    ref={(el) => {
-      cardsRef.current[i] = el;
-    }}
-    className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10 shadow-xl"
-  >
-    <div className="text-[#101010]">
-      <h3 className="text-[48px] font-bold tracking-tight mb-4">
-        {step.title}
-      </h3>
-      <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
-        {step.desc}
-      </p>
-    </div>
-  </div>
-))}
-
+      {/* DESKTOP */}
+      {!isMobile && (
+        <div className="relative w-full overflow-hidden">
+          <div className="flex gap-[16px] pl-[16px]">
+            {steps.map((step, i) => (
+              <div
+                key={i}
+                ref={(el) => (cardsRef.current[i] = el)}
+                className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10"
+              >
+                <div className="text-[#101010]">
+                  <h3 className="text-[48px] font-bold tracking-tight mb-4">
+                    {step.title}
+                  </h3>
+                  <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
+                    {step.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* MOBILE */}
+      {isMobile && (
+        <div className="relative w-full overflow-hidden px-4">
+          <div className="flex flex-col gap-[16px]">
+            {steps.map((step, i) => (
+              <div
+                key={i}
+                ref={(el) => (cardsRef.current[i] = el)}
+                className="w-full h-[260px] bg-[#F1FF9C] px-8 py-8"
+              >
+                <div className="text-[#101010]">
+                  <h3 className="text-[36px] font-bold tracking-tight mb-3">
+                    {step.title}
+                  </h3>
+                  <p className="text-[18px] whitespace-pre-line leading-tight text-[#101010]">
+                    {step.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* small spacer */}
+      <div className="h-40 md:h-60"></div>
     </section>
   );
 }

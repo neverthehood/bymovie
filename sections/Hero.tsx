@@ -182,11 +182,24 @@ export default function Hero() {
           </h1>
         </div>
 
-        <button
-          ref={mButton}
-          className="absolute bottom-6 right-6 z-[999] rounded-full bg-[#D7F000] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-black">
-          BY MOVIE VP PAVILION
-        </button>
+        <div className="flex justify-center md:justify-end">
+  <button
+    ref={mButton}
+    className="
+      rounded-full 
+      bg-[#D7F000] 
+      px-5 py-2 
+      text-[10px] 
+      font-semibold 
+      uppercase 
+      tracking-[0.18em] 
+      text-black
+    "
+  >
+    BY MOVIE VP PAVILION
+  </button>
+</div>
+
 
         {/* MOBILE MASKS */}
         <div ref={mWrapper} className="pointer-events-none absolute inset-0 z-30 overflow-hidden">

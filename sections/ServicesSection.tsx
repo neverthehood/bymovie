@@ -20,42 +20,42 @@ export default function ServicesSection() {
 
   const total = services.length;
 
-  // --------------------------------------------------------
-  // FIX №1 — правильная высота секции = точно во весь экран
-  // --------------------------------------------------------
+  // ─────────────────────────────────────────────
+  //      FIX: ПОЛНАЯ ФИКСАЦИЯ ЭКРАНА
+  // ─────────────────────────────────────────────
   useLayoutEffect(() => {
     if (!sectionRef.current) return;
 
-    // фиксируем секцию ЧЁТКО как отдельный экран
     const st = ScrollTrigger.create({
       trigger: sectionRef.current,
       start: "top top",
-      end: "+=1000", // длина фиксации, можно регулировать
+      end: "bottom top", // ← секция фиксируется РОВНО до своего конца
       pin: true,
-      pinSpacing: true,
+      pinSpacing: false,
       scrub: false,
     });
 
     return () => st.kill();
   }, []);
 
-  // --------------------------------------------------------
-  // MOBILE detect
-  // --------------------------------------------------------
+  // ─────────────────────────────────────────────
+  //   MOBILE DETECT
+  // ─────────────────────────────────────────────
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
+
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
   useEffect(() => {
     if (active < total - 1) setCanExit(false);
-  }, [active, total]);
+  }, [active]);
 
-  // --------------------------------------------------------
-  // Subtitle positioning
-  // --------------------------------------------------------
+  // ─────────────────────────────────────────────
+  //  Subtitle positioning
+  // ─────────────────────────────────────────────
   const positionSubtitle = (index: number) => {
     if (isMobile) return;
     if (!subtitleRef.current || !titleRefs.current[index] || !sectionRef.current) return;
@@ -70,9 +70,9 @@ export default function ServicesSection() {
     });
   };
 
-  // --------------------------------------------------------
-  // Video animation
-  // --------------------------------------------------------
+  // ─────────────────────────────────────────────
+  //    Video animation
+  // ─────────────────────────────────────────────
   useLayoutEffect(() => {
     if (!videoTrackRef.current) return;
 
@@ -80,33 +80,46 @@ export default function ServicesSection() {
       yPercent: -100 * active,
       duration: 0.9,
       ease: "power3.inOut",
-      onComplete: () => {
-        isAnimating.current = false;
-      },
+      onComplete: () => (isAnimating.current = false),
     });
 
     positionSubtitle(active);
   }, [active]);
 
-  // --------------------------------------------------------
-  // Scroll logic INSIDE pinned block
-  // --------------------------------------------------------
+  // ─────────────────────────────────────────────
+  //     Scroll logic
+  // ─────────────────────────────────────────────
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
 
     const onWheel = (event: WheelEvent) => {
-      if (isMobile) return;
-
       const delta = event.deltaY;
 
-      // блок во время анимации
+      // ───── MOBILE LOGIC (SWIPES)
+      if (isMobile) {
+        event.preventDefault();
+
+        if (delta > 0 && active < total - 1) {
+          setActive((p) => p + 1);
+          return;
+        }
+
+        if (delta < 0 && active > 0) {
+          setActive((p) => p - 1);
+          return;
+        }
+
+        return;
+      }
+
+      // ───── DESKTOP
       if (isAnimating.current) {
         event.preventDefault();
         return;
       }
 
-      // вниз
+      // DOWN
       if (delta > 0) {
         if (active < total - 1) {
           event.preventDefault();
@@ -121,11 +134,10 @@ export default function ServicesSection() {
           return;
         }
 
-        // canExit === true → выпускаем наружу
         return;
       }
 
-      // вверх
+      // UP
       if (delta < 0) {
         if (active > 0) {
           event.preventDefault();
@@ -134,24 +146,24 @@ export default function ServicesSection() {
           return;
         }
 
-        // active === 0 → выпустить наверх
         return;
       }
     };
 
-    // ❗ важнейшее: НЕ capture!
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel as any);
-  }, [active, canExit, isMobile, total]);
+  }, [isMobile, active, canExit]);
 
-  // --------------------------------------------------------
-  // Clicks
-  // --------------------------------------------------------
+  // ─────────────────────────────────────────────
+  //                 Clicks
+  // ─────────────────────────────────────────────
   const clickItem = (i: number) => {
     if (i === active || isAnimating.current) return;
     isAnimating.current = true;
     setActive(i);
   };
+
+  // ─────────────────────────────────────────────
 
   return (
     <section
@@ -159,11 +171,17 @@ export default function ServicesSection() {
       className="relative w-full min-h-screen overflow-hidden bg-black"
       data-scroll
     >
-      {/* VIDEO TRACK */}
+      {/* VIDEO STACK */}
       <div ref={videoTrackRef} className="absolute inset-0 flex flex-col h-full w-full">
         {services.map((service) => (
           <div key={service.title} className="h-full w-full flex-shrink-0">
-            <video className="h-full w-full object-cover" muted loop autoPlay playsInline>
+            <video
+              className="h-full w-full object-cover"
+              muted
+              loop
+              autoPlay
+              playsInline
+            >
               <source src={service.webm} type="video/webm" />
               <source src={service.mp4} type="video/mp4" />
             </video>
@@ -178,19 +196,16 @@ export default function ServicesSection() {
         {services.map((s, i) => (
           <div
             key={s.title}
-            ref={(el: HTMLDivElement | null) => {
-  titleRefs.current[i] = el;
-  return undefined; // можно и так, но не нужно
-}}
-
-
-
+            ref={(el) => {
+              titleRefs.current[i] = el;
+            }}
             onClick={() => clickItem(i)}
             className={`cursor-pointer text-3xl md:text-4xl font-bold uppercase tracking-tight transition-all duration-300 ${
               i === active ? "text-[#D7F000]" : "text-white/15"
             }`}
           >
             {s.title}
+
             {isMobile && i === active && (
               <div className="mt-2 text-white/85 text-base leading-snug">
                 {s.subtitle}
