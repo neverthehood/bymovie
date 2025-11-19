@@ -52,30 +52,28 @@ export default function HowWeWork() {
           pin: true,
           pinSpacing: true,
           onUpdate: (self) => {
-            const t = self.progress;
+  const t = self.progress;
 
-            cards.forEach((card, i) => {
-              if (i === 0) {
-                // первая карточка стоит, только фильтр
-                const sat = calcSaturation(t, i);
-                gsap.set(card, { x: 0, filter: `saturate(${sat})` });
-                return;
-              }
+  cards.forEach((card, i) => {
+    const sat = calcSaturation(i, cards.length);
 
-              const rawX = -t * totalDistance;
+    if (i === 0) {
+      gsap.set(card, { x: 0, filter: `saturate(${sat})` });
+      return;
+    }
 
-              const lastLimit = -(CW * i - (viewport - CW));
-              const overlapLimit = -(OVERLAP * i);
-              const limit = Math.max(lastLimit, overlapLimit);
+    const rawX = -t * totalDistance;
+    const lastLimit = -(CW * i - (viewport - CW));
+    const overlapLimit = -(OVERLAP * i);
+    const limit = Math.max(lastLimit, overlapLimit);
 
-              const sat = calcSaturation(t, i);
-
-              gsap.set(card, {
-                x: Math.max(rawX, limit),
-                filter: `saturate(${sat})`,
-              });
-            });
-          },
+    gsap.set(card, {
+      x: Math.max(rawX, limit),
+      filter: `saturate(${sat})`,
+    });
+  });
+}
+,
         });
       }
 
@@ -94,25 +92,26 @@ export default function HowWeWork() {
           pin: true,
           pinSpacing: false,
           onUpdate: (self) => {
-            const t = self.progress;
+  const t = self.progress;
 
-            cards.forEach((card, i) => {
-              if (i === 0) {
-                const sat = calcSaturation(t, i);
-                gsap.set(card, { y: 0, filter: `saturate(${sat})` });
-                return;
-              }
+  cards.forEach((card, i) => {
+    const sat = calcSaturation(i, cards.length);
 
-              const rawY = -t * totalDistance;
-              const limit = -(OVERLAP * i);
-              const sat = calcSaturation(t, i);
+    if (i === 0) {
+      gsap.set(card, { y: 0, filter: `saturate(${sat})` });
+      return;
+    }
 
-              gsap.set(card, {
-                y: Math.max(rawY, limit),
-                filter: `saturate(${sat})`,
-              });
-            });
-          },
+    const rawY = -t * totalDistance;
+    const limit = -(OVERLAP * i);
+
+    gsap.set(card, {
+      y: Math.max(rawY, limit),
+      filter: `saturate(${sat})`,
+    });
+  });
+}
+,
         });
       }
     }, section);
@@ -120,16 +119,13 @@ export default function HowWeWork() {
     return () => ctx.revert();
   }, [isMobile]);
 
-  // отдельная маленькая функция для насыщенности
-  const calcSaturation = (t: number, index: number) => {
-    // t: 0 → 1; index: 0,1,2...
-    // Более тёмные (менее насыщенные) — ПЕРВЫЕ карточки при продвижении скролла
-    const base = 1 - t; // чем дальше скролл, тем меньше
-    const indexOffset = index * 0.18; // дальше по списку — светлее
-    const raw = base - indexOffset; // может уйти в минус
-    const sat = 0.4 + Math.max(0, raw) * 0.6; // clamp ~ [0.4, 1.0]
-    return Math.max(0.4, Math.min(1, sat));
-  };
+
+  // лёгкая насыщенность от верхних ↓ к нижним ↑
+const calcSaturation = (index: number, total: number) => {
+  const factor = index / (total - 1); // 0 → 1
+  return 0.88 + factor * 0.42;        // 0.88 → 1.0
+};
+
 
   return (
     <section

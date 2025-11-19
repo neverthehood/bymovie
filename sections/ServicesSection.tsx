@@ -21,32 +21,25 @@ export default function ServicesSection() {
   const total = services.length;
 
   // ─────────────────────────────────────────────
-  //      FIX: ПОЛНАЯ ФИКСАЦИЯ ЭКРАНА
+  // PIN SECTION — одинаковый для всех устройств
   // ─────────────────────────────────────────────
   useLayoutEffect(() => {
-  const section = sectionRef.current;
-  if (!section) return;
+    if (!sectionRef.current) return;
 
-  // убиваем предыдущие пины на этом же секшене
-  ScrollTrigger.getAll().forEach((t) => {
-    if (t.vars.trigger === section) t.kill();
-  });
+    const st = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      end: "bottom top",
+      pin: true,
+      pinSpacing: false,
+      scrub: false,
+    });
 
-  const st = ScrollTrigger.create({
-    trigger: section,
-    start: "top top",
-    end: "bottom top",
-    pin: true,
-    pinSpacing: false,
-    scrub: false,
-  });
-
-  return () => st.kill();
-}, []);
-
+    return () => st.kill();
+  }, []);
 
   // ─────────────────────────────────────────────
-  //   MOBILE DETECT
+  // Mobile detection
   // ─────────────────────────────────────────────
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -61,7 +54,7 @@ export default function ServicesSection() {
   }, [active]);
 
   // ─────────────────────────────────────────────
-  //  Subtitle positioning
+  // Subtitle positioning
   // ─────────────────────────────────────────────
   const positionSubtitle = (index: number) => {
     if (isMobile) return;
@@ -78,58 +71,43 @@ export default function ServicesSection() {
   };
 
   // ─────────────────────────────────────────────
-  //    Video animation
+  // VIDEO TRANSITION
   // ─────────────────────────────────────────────
   useLayoutEffect(() => {
     if (!videoTrackRef.current) return;
 
     gsap.to(videoTrackRef.current, {
-  yPercent: -100 * active,
-  duration: 0.9,
-  ease: "power3.inOut",
-  onComplete: () => {
-    isAnimating.current = false;
-  },
-});
-
+      yPercent: -100 * active,
+      duration: 0.9,
+      ease: "power3.inOut",
+      onComplete: () => {
+        isAnimating.current = false;
+        return;
+      },
+    });
 
     positionSubtitle(active);
   }, [active]);
 
   // ─────────────────────────────────────────────
-  //     Scroll logic
+  // DESKTOP & MOBILE SCROLL / SWIPE HANDLING
   // ─────────────────────────────────────────────
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
 
+    // ========== DESKTOP WHEEL ==============
     const onWheel = (event: WheelEvent) => {
       const delta = event.deltaY;
 
-      // ───── MOBILE LOGIC (SWIPES)
-      if (isMobile) {
-        event.preventDefault();
+      if (isMobile) return; // wheel игнорируем на мобилке
 
-        if (delta > 0 && active < total - 1) {
-          setActive((p) => p + 1);
-          return;
-        }
-
-        if (delta < 0 && active > 0) {
-          setActive((p) => p - 1);
-          return;
-        }
-
-        return;
-      }
-
-      // ───── DESKTOP
       if (isAnimating.current) {
         event.preventDefault();
         return;
       }
 
-      // DOWN
+      // вниз
       if (delta > 0) {
         if (active < total - 1) {
           event.preventDefault();
@@ -147,7 +125,7 @@ export default function ServicesSection() {
         return;
       }
 
-      // UP
+      // вверх
       if (delta < 0) {
         if (active > 0) {
           event.preventDefault();
@@ -155,17 +133,68 @@ export default function ServicesSection() {
           setActive((p) => p - 1);
           return;
         }
-
         return;
       }
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel as any);
+
+    // ========== MOBILE TOUCH SWIPES ============
+    if (isMobile) {
+      let startY = 0;
+      let endY = 0;
+
+      const onTouchStart = (e: TouchEvent) => {
+        startY = e.touches[0].clientY;
+      };
+
+      const onTouchMove = (e: TouchEvent) => {
+        endY = e.touches[0].clientY;
+        e.preventDefault(); // блокируем скролл страницы
+      };
+
+      const onTouchEnd = () => {
+        const diff = startY - endY;
+
+        // свайп вверх
+        if (diff > 40) {
+          if (active < total - 1) {
+            setActive((p) => p + 1);
+            return;
+          }
+          return;
+        }
+
+        // свайп вниз
+        if (diff < -40) {
+          if (active > 0) {
+            setActive((p) => p - 1);
+            return;
+          }
+          return;
+        }
+      };
+
+      el.addEventListener("touchstart", onTouchStart, { passive: false });
+      el.addEventListener("touchmove", onTouchMove, { passive: false });
+      el.addEventListener("touchend", onTouchEnd, { passive: false });
+
+      return () => {
+        el.removeEventListener("wheel", onWheel);
+        el.removeEventListener("touchstart", onTouchStart);
+        el.removeEventListener("touchmove", onTouchMove);
+        el.removeEventListener("touchend", onTouchEnd);
+      };
+    }
+
+    // DESKTOP cleanup
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
   }, [isMobile, active, canExit]);
 
   // ─────────────────────────────────────────────
-  //                 Clicks
+  // CLICK
   // ─────────────────────────────────────────────
   const clickItem = (i: number) => {
     if (i === active || isAnimating.current) return;
@@ -181,7 +210,7 @@ export default function ServicesSection() {
       className="relative w-full min-h-screen overflow-hidden bg-black"
       data-scroll
     >
-      {/* VIDEO STACK */}
+      {/* VIDEO TRACK */}
       <div ref={videoTrackRef} className="absolute inset-0 flex flex-col h-full w-full">
         {services.map((service) => (
           <div key={service.title} className="h-full w-full flex-shrink-0">
@@ -206,9 +235,7 @@ export default function ServicesSection() {
         {services.map((s, i) => (
           <div
             key={s.title}
-            ref={(el) => {
-              titleRefs.current[i] = el;
-            }}
+            ref={(el) => (titleRefs.current[i] = el)}
             onClick={() => clickItem(i)}
             className={`cursor-pointer text-3xl md:text-4xl font-bold uppercase tracking-tight transition-all duration-300 ${
               i === active ? "text-[#D7F000]" : "text-white/15"
@@ -225,7 +252,7 @@ export default function ServicesSection() {
         ))}
       </div>
 
-      {/* DESKTOP SUBTITLE */}
+      {/* SUBTITLE (DESKTOP) */}
       {!isMobile && (
         <div
           ref={subtitleRef}
