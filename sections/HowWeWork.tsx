@@ -36,43 +36,52 @@ export default function HowWeWork() {
     if (!section || cards.length < 2) return;
 
     const ctx = gsap.context(() => {
-      // DESKTOP — горизонтальный режим
-      if (!isMobile) {
-        const CW = 570;
-        const GAP = 16;
-        const OVERLAP = (CW + GAP) * 0.65; // карточка заезжает только на 65%
-        const totalDistance = OVERLAP * (cards.length - 1);
-        const viewport = window.innerWidth;
+      
+      // === DESKTOP — горизонтальный режим ===
+if (!isMobile) {
+  const CW = 570;
+  const GAP = 16;
+  const OVERLAP = (CW + GAP) * 0.65;
+  const totalDistance = OVERLAP * (cards.length - 1);
+  const viewport = window.innerWidth;
 
-        ScrollTrigger.create({
-          trigger: section,
-          start: "top+=50 top",
-          end: `+=${totalDistance}`,
-          scrub: true,
-          pin: true,
-          pinSpacing: true,
-          onUpdate: (self) => {
-  const t = self.progress;
+  ScrollTrigger.create({
+    trigger: section,
+    start: "top+=50 top",
+    end: `+=${totalDistance}`,
+    scrub: true,
+    pin: true,
+    pinSpacing: true,
 
-  cards.forEach((card, i) => {
-    const sat = calcSaturation(i, cards.length);
+    onUpdate: (self) => {
+      const t = self.progress;
 
-    if (i === 0) {
-      gsap.set(card, { x: 0, filter: `saturate(${sat})` });
-      return;
-    }
+      cards.forEach((card, i) => {
+        const sat = calcSaturation(t, i);
 
-    const rawX = -t * totalDistance;
-    const lastLimit = -(CW * i - (viewport - CW));
-    const overlapLimit = -(OVERLAP * i);
-    const limit = Math.max(lastLimit, overlapLimit);
+        if (i === 0) {
+          gsap.set(card, { x: 0, filter: `saturate(${sat})` });
+          return;
+        }
 
-    gsap.set(card, {
-      x: Math.max(rawX, limit),
-      filter: `saturate(${sat})`,
-    });
+        const rawX = -t * totalDistance;
+
+        // --- FIX: корректная правая граница без разлёта ---
+        const leftOverlapLimit = -(OVERLAP * i);
+        const rightEdgeLimit = -(CW * (i - 1));
+
+        // карточка НИКОГДА не едет вправо от своей позиции
+        const limit = Math.min(leftOverlapLimit, rightEdgeLimit);
+
+        gsap.set(card, {
+          x: Math.max(rawX, limit),
+          filter: `saturate(${sat})`,
+        });
+      });
+    },
   });
 }
+
 ,
         });
       }
