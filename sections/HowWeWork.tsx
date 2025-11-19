@@ -133,7 +133,10 @@ export default function HowWeWork() {
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => (cardsRef.current[i] = el)}
+                ref={(el) => {
+  cardsRef.current[i] = el;
+}}
+
                 className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10"
               >
                 <div className="text-[#101010]">
@@ -157,7 +160,10 @@ export default function HowWeWork() {
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => (cardsRef.current[i] = el)}
+                ref={(el) => {
+  cardsRef.current[i] = el;
+}}
+
                 className="w-full h-[260px] bg-[#F1FF9C] px-8 py-8"
               >
                 <div className="text-[#101010]">
