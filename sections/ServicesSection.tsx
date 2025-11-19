@@ -24,19 +24,26 @@ export default function ServicesSection() {
   //      FIX: ПОЛНАЯ ФИКСАЦИЯ ЭКРАНА
   // ─────────────────────────────────────────────
   useLayoutEffect(() => {
-    if (!sectionRef.current) return;
+  const section = sectionRef.current;
+  if (!section) return;
 
-    const st = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: "top top",
-      end: "bottom top", // ← секция фиксируется РОВНО до своего конца
-      pin: true,
-      pinSpacing: false,
-      scrub: false,
-    });
+  // убиваем предыдущие пины на этом же секшене
+  ScrollTrigger.getAll().forEach((t) => {
+    if (t.vars.trigger === section) t.kill();
+  });
 
-    return () => st.kill();
-  }, []);
+  const st = ScrollTrigger.create({
+    trigger: section,
+    start: "top top",
+    end: "bottom top",
+    pin: true,
+    pinSpacing: false,
+    scrub: false,
+  });
+
+  return () => st.kill();
+}, []);
+
 
   // ─────────────────────────────────────────────
   //   MOBILE DETECT
