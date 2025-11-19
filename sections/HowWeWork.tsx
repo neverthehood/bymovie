@@ -17,12 +17,10 @@ const steps = [
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
-
   const [isMobile, setIsMobile] = useState(false);
 
-  // ----------------------------
-  // Correct mobile detection
-  // ----------------------------
+  const fadeValues = [1, 0.9, 0.82, 0.74, 0.66]; // C-medium
+
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -38,74 +36,80 @@ export default function HowWeWork() {
     const ctx = gsap.context(() => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
 
-      // -------------------------------------------------
-      // DESKTOP — horizontal overlapping animation
-      // -------------------------------------------------
+      // ===== DESKTOP =====
       if (!isMobile) {
         const CW = 570;
         const GAP = 16;
-
-        // partial overlap (65%)
         const OVERLAP = (CW + GAP) * 0.65;
-
         const totalDistance = OVERLAP * (cards.length - 1);
-        const viewport = window.innerWidth;
 
         ScrollTrigger.create({
           trigger: section,
-          start: "top top",
+          start: "top+=50 top",
           end: `+=${totalDistance}`,
           scrub: true,
           pin: true,
           pinSpacing: true,
-
           onUpdate: (self) => {
-            const t = self.progress;
-            cards.forEach((card, i) => {
-              if (i === 0) return;
+  const t = self.progress;
 
-              const rawX = -t * totalDistance;
+  cards.forEach((card, i) => {
+    const rawX = -t * totalDistance;
+    const limit = -(OVERLAP * i);
 
-              const limit =
-                -(OVERLAP * i) > -(CW * i - (viewport - CW))
-                  ? -(CW * i - (viewport - CW))
-                  : -(OVERLAP * i);
+    // --- ДИНАМИКА ДЛЯ ПЕРВЫХ КАРТОЧЕК ---
+    // обратный индекс
+    const depthIndex = cards.length - 1 - i;
 
-              gsap.set(card, { x: Math.max(rawX, limit) });
-            });
-          },
+    // снижение насыщенности
+    const saturation = 1 - t * (0.18 * depthIndex);
+    const satClamped = Math.max(0.35, saturation);
+
+    gsap.set(card, {
+      x: Math.max(rawX, limit),
+      filter: `saturate(${satClamped})`
+    });
+  });
+},
+
+
         });
       }
 
-      // -------------------------------------------------
-      // MOBILE — vertical overlapping animation
-      // -------------------------------------------------
+      // ===== MOBILE =====
       else {
         const CH = 260;
         const GAP = 16;
-        const OVERLAP = (CH + GAP) * 0.7; // as per screenshot
-
+        const OVERLAP = (CH + GAP) * 0.7;
         const totalDistance = OVERLAP * (cards.length - 1);
 
         ScrollTrigger.create({
           trigger: section,
-          start: "top top",
+          start: "top+=50 top",
           end: `+=${totalDistance}`,
           scrub: true,
           pin: true,
           pinSpacing: false,
-
           onUpdate: (self) => {
-            const t = self.progress;
-            cards.forEach((card, i) => {
-              if (i === 0) return;
+  const t = self.progress;
 
-              const rawY = -t * totalDistance;
-              const limit = -(OVERLAP * i);
+  cards.forEach((card, i) => {
+    const rawY = -t * totalDistance;
+    const limit = -(OVERLAP * i);
 
-              gsap.set(card, { y: Math.max(rawY, limit) });
-            });
-          },
+    const depthIndex = cards.length - 1 - i;
+
+    const saturation = 1 - t * (0.18 * depthIndex);
+    const satClamped = Math.max(0.35, saturation);
+
+    gsap.set(card, {
+      y: Math.max(rawY, limit),
+      filter: `saturate(${satClamped})`
+    });
+  });
+},
+
+
         });
       }
     }, section);
@@ -116,8 +120,7 @@ export default function HowWeWork() {
   return (
     <section
       ref={sectionRef}
-      data-scroll
-      className="relative w-full min-h-screen bg-black text-white overflow-hidden pt-40 pb-0"
+      className="relative w-full min-h-screen bg-black text-white overflow-hidden pt-40"
     >
       <h2 className="text-center text-5xl font-bold mb-20">HOW WE WORK</h2>
 
@@ -128,19 +131,17 @@ export default function HowWeWork() {
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => {
+                ref={(el: HTMLDivElement | null) => {
                   cardsRef.current[i] = el;
                 }}
                 className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10"
               >
-                <div className="text-[#101010]">
-                  <h3 className="text-[48px] font-bold tracking-tight mb-4">
-                    {step.title}
-                  </h3>
-                  <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
-                    {step.desc}
-                  </p>
-                </div>
+                <h3 className="text-[48px] font-bold mb-4 text-[#101010]">
+                  {step.title}
+                </h3>
+                <p className="text-[20px] whitespace-pre-line text-[#101010]">
+                  {step.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -154,26 +155,24 @@ export default function HowWeWork() {
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => {
+                ref={(el: HTMLDivElement | null) => {
                   cardsRef.current[i] = el;
                 }}
                 className="w-full h-[260px] bg-[#F1FF9C] px-8 py-8"
               >
-                <div className="text-[#101010]">
-                  <h3 className="text-[36px] font-bold tracking-tight mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-[18px] whitespace-pre-line leading-tight text-[#101010]">
-                    {step.desc}
-                  </p>
-                </div>
+                <h3 className="text-[36px] font-bold mb-3 text-[#101010]">
+                  {step.title}
+                </h3>
+                <p className="text-[18px] whitespace-pre-line text-[#101010]">
+                  {step.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* spacer so Projects is visible */}
+      {/* Отступ под Projects */}
       <div className="h-40 md:h-60"></div>
     </section>
   );
