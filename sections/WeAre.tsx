@@ -10,61 +10,50 @@ const text =
   "We are BY Movie, a full-service studio in the world of virtual media production. Over 10 years we work at the intersection of technology and visual art.";
 
 export default function WeAre() {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const el = ref.current;
+    if (!el) return;
 
-    const words = Array.from(
-      section.querySelectorAll<HTMLElement>(".word")
-    );
+    const words = el.querySelectorAll<HTMLElement>(".word");
     if (!words.length) return;
 
-    const STEP = 80; // длина одного "шага" по скроллу
-    const total = STEP * words.length;
+    const isMobile = window.innerWidth < 768;
+    const distance = isMobile ? 800 : 1500; // длина скролла для анимации
 
     const ctx = gsap.context(() => {
-      // стартовый цвет
       gsap.set(words, { color: "rgba(255,255,255,0.18)" });
 
-      let lastIndex = -1;
-
+      // pin секции
       ScrollTrigger.create({
-        trigger: section,
+        trigger: el,
         start: "top top",
-        end: `+=${total}`,
+        end: `+=${distance}`,
         pin: true,
         scrub: true,
-        onUpdate(self) {
-          const progress = self.progress; // 0..1
-          let index = Math.floor(progress * words.length);
+      });
 
-          if (index < 0) index = 0;
-          if (index >= words.length) index = words.length - 1;
-
-          if (index === lastIndex) return;
-          lastIndex = index;
-
-          // красим слова дискретно: всё до текущего – белое, остальное – полупрозрачное
-          words.forEach((w, i) => {
-            gsap.to(w, {
-              color: i <= index ? "#ffffff" : "rgba(255,255,255,0.18)",
-              duration: 0.25,
-              ease: "none",
-              overwrite: "auto",
-            });
-          });
+      // закрашивание слов
+      gsap.to(words, {
+        color: "white",
+        stagger: isMobile ? 0.2 : 0.12,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: `+=${distance}`,
+          scrub: true,
         },
       });
-    }, section);
+    }, el);
 
     return () => ctx.revert();
   }, []);
 
   return (
     <section
-      ref={sectionRef}
+      ref={ref}
       data-scroll
       className="
         w-full min-h-screen
