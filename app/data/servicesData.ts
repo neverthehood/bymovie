@@ -16,14 +16,14 @@ export const services = [
   {
     id: 2,
     title: "LIVE CHROMAKEY",
-    subtitle: "The background changes in real time. No surprises in the post.",
+    subtitle: "The background changes in real time. \nNo surprises in the post.",
     webm: "/assets/services/chromakey.webm",
     mp4: "/assets/services/chromakey.mp4",
   },
   {
     id: 3,
     title: "3D LOCATION & CHARACTER DEVELOPMENT",
-    subtitle: "Any style: realism, sci-fi, stylization. Unreal Engine inside.",
+    subtitle: "Any style: realism, sci-fi, stylization. \nUnreal Engine inside.",
     webm: "/assets/services/3d.webm",
     mp4: "/assets/services/3d.mp4",
   },
@@ -37,7 +37,7 @@ export const services = [
   {
     id: 5,
     title: "STUDIO AND LED WALL RENT",
-    subtitle: "Your own production? Come with a team - we'll help with the tech part.",
+    subtitle: "Your own production? \nCome with a team - we'll help with the tech part.",
     webm: "/assets/services/rent.webm",
     mp4: "/assets/services/rent.mp4",
   },

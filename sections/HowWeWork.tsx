@@ -2,9 +2,6 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const steps = [
   { title: "IDEA", desc: "Discuss the task,\nfind a style, collect references." },
@@ -16,10 +13,11 @@ const steps = [
 
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const stickyRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // MOBILE detection
+  // detect mobile
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -27,152 +25,126 @@ export default function HowWeWork() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  // DESKTOP: горизонтальный скролл по вертикальному
   useLayoutEffect(() => {
+    if (isMobile) return;
+
     const section = sectionRef.current;
-    const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
-    if (!section || cards.length < 2) return;
+    const sticky = stickyRef.current;
+    const track = trackRef.current;
+    if (!section || !sticky || !track) return;
 
-    const ctx = gsap.context(() => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+    const onResize = () => {
+      const vh = window.innerHeight;
+      const SCROLL_SPAN = vh * 2; // 2 экрана вертикального скролла под анимацию
+      section.style.height = `${vh + SCROLL_SPAN}px`;
+    };
 
-      // ╔═══════════════════════════════════════╗
-      // ║ DESKTOP — полностью как в рабочей версии ║
-      // ╚═══════════════════════════════════════╝
-      if (!isMobile) {
-        const CW = 570;
-        const GAP = 16;
-        const STOP = (CW + GAP) / 2;
-        const viewport = window.innerWidth;
+    onResize();
 
-        ScrollTrigger.create({
-          trigger: section,
-          start: "top top",
-          end: "+=800",
-          scrub: true,
-          pin: true,
-          pinSpacing: true,
+    const onScroll = () => {
+      if (!section || !sticky || !track) return;
 
-          onUpdate: (self) => {
-            const t = self.progress;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const SCROLL_SPAN = vh * 2;
 
-            cards.forEach((card, i) => {
-              if (i === 0) return;
+      // секция не в экране — ничего не делаем
+      if (rect.bottom <= 0 || rect.top >= vh) return;
 
-              const rawX = -t * (STOP * (cards.length - 1));
-              let limit = -(STOP * i);
+      // 0 (начало анимации) — когда верх секции дошёл до верха вьюпорта
+      const offsetInside = Math.min(Math.max(-rect.top, 0), SCROLL_SPAN);
+      const t = offsetInside / SCROLL_SPAN; // 0..1
 
-              if (i === cards.length - 1) {
-                const fullStop = -(CW * i - (viewport - CW));
-                limit = fullStop;
-              }
+      const containerWidth = sticky.clientWidth;
+      const contentWidth = track.scrollWidth;
+      const maxShift = Math.max(contentWidth - containerWidth, 0);
 
-              gsap.set(card, { x: Math.max(rawX, limit) });
-            });
-          },
-        });
-      }
+      const shift = -t * maxShift;
+      gsap.set(track, { x: shift });
+    };
 
-      // ╔══════════════════════════════════════════╗
-      // ║ MOBILE — новая версия с overlap + saturation ║
-      // ╚══════════════════════════════════════════╝
-      else {
-        const CH = 260;
-        const GAP = 16;
-        const OVERLAP = (CH + GAP) * 0.7;
-        const totalDistance = OVERLAP * (cards.length - 1);
+    window.addEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize);
 
-        ScrollTrigger.create({
-          trigger: section,
-          start: "top+=50 top",
-          end: `+=${totalDistance}`,
-          scrub: true,
-          pin: true,
-          pinSpacing: false,
+    // сразу прогнать один раз
+    onScroll();
 
-          onUpdate: (self) => {
-            const t = self.progress;
-
-            cards.forEach((card, i) => {
-              const rawY = -t * totalDistance;
-              const limit = -(OVERLAP * i);
-
-              // насыщенность — только для УПЕРХНИХ
-              const sat = calcSaturationMobile(t, i);
-
-              gsap.set(card, {
-                y: i === 0 ? 0 : Math.max(rawY, limit),
-                filter: `saturate(${sat})`,
-              });
-            });
-          },
-        });
-      }
-    }, section);
-
-    return () => ctx.revert();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      if (section) section.style.height = "";
+    };
   }, [isMobile]);
-
-  // мягкое уменьшение насыщенности на мобилке (верхние — более блеклые)
-  const calcSaturationMobile = (t: number, index: number) => {
-    const fade = 0.85 - t * 0.7; // тень по мере скролла
-    const offset = 1 - index * 0.12; // каждая следующая карточка насыщеннее
-    return Math.max(0.55, Math.min(1, fade * offset));
-  };
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen bg-black text-white overflow-hidden pt-40 pb-0"
+      className="relative w-full bg-black text-white overflow-visible"
     >
-      <h2 className="text-center text-5xl font-bold mb-20">HOW WE WORK</h2>
+      {/* sticky-контейнер на 100vh */}
+      <div
+        ref={stickyRef}
+        className="sticky top-0 h-screen flex flex-col justify-center px-6"
+      >
+        <h2 className="text-center text-5xl font-bold mb-12 pb-16">
+          HOW WE WORK
+        </h2>
 
-      {/* DESKTOP layout */}
-      {!isMobile && (
-        <div className="relative w-full overflow-hidden">
-          <div className="flex gap-[16px] pl-[16px]">
-            {steps.map((step, i) => (
-              <div
-                key={i}
-                ref={(el) => (cardsRef.current[i] = el)}
-                className="w-[570px] h-[290px] bg-[#F1FF9C] flex-shrink-0 px-10 py-10"
-              >
-                <div className="text-[#101010]">
-                  <h3 className="text-[48px] font-bold tracking-tight mb-4">
+        {/* DESKTOP: горизонтальные карточки */}
+        {!isMobile && (
+          <div className="relative w-full overflow-hidden">
+            <div
+              ref={trackRef}
+              className="flex gap-[24px] pl-[24px] pr-[24px]"
+            >
+              {steps.map((step, i) => (
+                <div
+                  key={i}
+                  className="w-[40vw] min-w-[40vw] h-[340px] bg-[#F1FF9C] flex-shrink-0 px-12 py-12 rounded-[4px] shadow-[0_0_0_1px_#00000015]"
+                >
+                  <div className="text-[#101010] h-full flex flex-col justify-between">
+                    <div>
+                      <div className="text-[18px] mb-1 opacity-50">
+                        [{i + 1}]
+                      </div>
+
+                      <h3 className="text-[46px] font-bold tracking-tight mb-6">
+                        {step.title}
+                      </h3>
+                    </div>
+
+                    <p className="text-[22px] whitespace-pre-line leading-tight text-[#101010]">
+                      {step.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* MOBILE: простая вертикальная колонка */}
+        {isMobile && (
+          <div className="relative w-full overflow-hidden px-2">
+            <div className="flex flex-col gap-4">
+              {steps.map((step, i) => (
+                <div
+                  key={i}
+                  className="w-full bg-[#F1FF9C] px-6 py-6 rounded-lg"
+                >
+                  <h3 className="text-[28px] font-bold mb-3 text-[#101010]">
                     {step.title}
                   </h3>
-                  <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
+                  <p className="text-[16px] whitespace-pre-line leading-tight text-[#101010]">
                     {step.desc}
                   </p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* MOBILE layout */}
-      {isMobile && (
-        <div className="relative w-full overflow-hidden px-4">
-          <div className="flex flex-col gap-[16px]">
-            {steps.map((step, i) => (
-              <div
-                key={i}
-                ref={(el) => (cardsRef.current[i] = el)}
-                className="w-full h-[260px] bg-[#F1FF9C] px-8 py-8"
-              >
-                <div className="text-[#101010]">
-                  <h3 className="text-[36px] font-bold tracking-tight mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-[18px] whitespace-pre-line leading-tight text-[#101010]">
-                    {step.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 }

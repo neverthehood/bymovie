@@ -10,23 +10,15 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-export default function ScrollController({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ScrollController({ children }: { children: React.ReactNode }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const isAutoRef = useRef(false);
 
-  // плавный easing
   const ease = (x: number) => -(Math.cos(Math.PI * x) - 1) / 2;
 
   const smoothScrollTo = (y: number) => {
     const start = window.scrollY;
     const duration = 350;
     const t0 = performance.now();
-
-    isAutoRef.current = true;
 
     const step = (now: number) => {
       const t = Math.min(1, (now - t0) / duration);
@@ -36,8 +28,6 @@ export default function ScrollController({
 
       if (t < 1) {
         requestAnimationFrame(step);
-      } else {
-        isAutoRef.current = false;
       }
     };
 
@@ -46,45 +36,39 @@ export default function ScrollController({
 
   useEffect(() => {
     const handler = (e: WheelEvent) => {
-  if (isAutoRef.current) {
-    e.preventDefault();
-    return;
-  }
+      if (DISABLE_AUTOSCROLL) return;
 
-  // ❗ если ЛЮБОЙ ScrollTrigger pinned — запрещаем автоскролл
-  const pinnedActive = ScrollTrigger.getAll().some(
-    (t) => t.pin && t.isActive
-  );
+      const pinnedActive = ScrollTrigger.getAll().some(
+        (t) => t.pin && t.isActive
+      );
 
-  if (pinnedActive) {
-    // даём секции самой обработать scroll
-    return;
-  }
+      if (pinnedActive) {
+        // ❗ блокируем нативный scroll, но НЕ выходим
+        e.preventDefault();
+        return; // GSAP уже перехватил scrollTrigger и работает сам
+      }
 
-  const root = containerRef.current;
-  if (!root) return;
+      const root = containerRef.current;
+      if (!root) return;
 
-  const sections = Array.from(
-    root.querySelectorAll<HTMLElement>("section[data-scroll]")
-  );
-  if (sections.length < 2) return;
+      const sections = Array.from(
+        root.querySelectorAll<HTMLElement>("section[data-scroll]")
+      );
+      if (sections.length < 2) return;
 
-  const hero = sections[0];
-  const weAre = sections[1];
+      const hero = sections[0];
+      const weAre = sections[1];
 
-  const scrollY = window.scrollY;
-  const heroStopZone = hero.offsetTop + hero.offsetHeight * 0.55;
+      const scrollY = window.scrollY;
+      const heroStopZone = hero.offsetTop + hero.offsetHeight * 0.55;
 
-  // HERO → WEARE автодоскролл
-  if (scrollY < heroStopZone && e.deltaY > 0) {
-    e.preventDefault();
-    smoothScrollTo(weAre.offsetTop);
-    return;
-  }
-
-  // Остальное — нативный скролл
-};
-
+      // HERO → WEARE автоскролл
+      if (scrollY < heroStopZone && e.deltaY > 0) {
+        e.preventDefault();
+        smoothScrollTo(weAre.offsetTop);
+        return;
+      }
+    };
 
     window.addEventListener("wheel", handler, { passive: false });
     return () => window.removeEventListener("wheel", handler as any);

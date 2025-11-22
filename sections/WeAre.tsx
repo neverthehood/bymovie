@@ -10,62 +10,63 @@ const text =
   "We are BY Movie, a full-service studio in the world of virtual media production. Over 10 years we work at the intersection of technology and visual art.";
 
 export default function WeAre() {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    const content = contentRef.current;
-    if (!section || !content) return;
+    const el = ref.current;
+    if (!el) return;
 
-    const words = content.querySelectorAll<HTMLElement>(".word");
+    const words = el.querySelectorAll<HTMLElement>(".word");
     if (!words.length) return;
 
-    gsap.set(words, { color: "rgba(255,255,255,0.15)" });
-
     const isMobile = window.innerWidth < 768;
+    const distance = isMobile ? 800 : 1500; // длина скролла для анимации
 
     const ctx = gsap.context(() => {
-      // -----------------------------
-      // PIN only the inner text block
-      // -----------------------------
+      gsap.set(words, { color: "rgba(255,255,255,0.18)" });
+
+      // pin секции
       ScrollTrigger.create({
-        trigger: section,
+        trigger: el,
         start: "top top",
-        end: isMobile ? "+=70%" : "+=120%",
-        pin: content,
-        pinSpacing: true,
+        end: `+=${distance}`,
+        pin: true,
         scrub: true,
       });
 
-      // -----------------------------
-      // Word coloring animation
-      // -----------------------------
+      // закрашивание слов
       gsap.to(words, {
         color: "white",
-        stagger: isMobile ? 0.20 : 0.12,
+        stagger: isMobile ? 0.2 : 0.12,
         ease: "none",
         scrollTrigger: {
-          trigger: section,
+          trigger: el,
           start: "top top",
-          end: isMobile ? "+=70%" : "+=120%",
+          end: `+=${distance}`,
           scrub: true,
         },
       });
-    }, section);
+    }, el);
 
     return () => ctx.revert();
   }, []);
 
   return (
     <section
-      ref={sectionRef}
+      ref={ref}
       data-scroll
-      className="w-full min-h-screen flex items-center justify-center bg-black px-6"
+      className="
+        w-full min-h-screen
+        flex items-center justify-center
+        bg-black px-6
+      "
     >
       <div
-        ref={contentRef}
-        className="max-w-[900px] mx-auto text-center font-anybody text-[36px] md:text-[58px] leading-[1.2]"
+        className="
+          max-w-[980px] mx-auto text-center font-anybody
+          leading-[1.2] tracking-tight
+          text-[32px] md:text-[58px]
+        "
       >
         {text.split(" ").map((w, i) => (
           <span key={i} className="word inline-block mr-[0.32em]">
