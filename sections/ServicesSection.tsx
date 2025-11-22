@@ -131,7 +131,10 @@ export default function ServicesSection() {
             {services.map((s, i) => (
               <div
                 key={i}
-                ref={(el) => (titleRefs.current[i] = el)}
+                ref={(el) => {
+                  titleRefs.current[i] = el;
+                }}
+
                 onClick={() => setActive(i)}
                 className={`
                   uppercase font-bold text-[22px]
