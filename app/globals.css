@@ -83,3 +83,24 @@ html, body {
   scroll-snap-stop: normal;       /* вместо always */
 }
 
+
+@keyframes stepSlideUp {
+  0% {
+    transform: translateY(100vh);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @keyframes stepSlideUp {
+    from {
+      transform: translateY(100vh);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+

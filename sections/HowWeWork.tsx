@@ -124,26 +124,62 @@ export default function HowWeWork() {
           </div>
         )}
 
-        {/* MOBILE: простая вертикальная колонка */}
         {isMobile && (
-          <div className="relative w-full overflow-hidden px-2">
-            <div className="flex flex-col gap-4">
-              {steps.map((step, i) => (
-                <div
-                  key={i}
-                  className="w-full bg-[#F1FF9C] px-6 py-6 rounded-lg"
-                >
-                  <h3 className="text-[28px] font-bold mb-3 text-[#101010]">
-                    {step.title}
-                  </h3>
-                  <p className="text-[16px] whitespace-pre-line leading-tight text-[#101010]">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
+          <div
+            ref={stickyRef}
+            className="sticky top-0 h-screen overflow-hidden z-10 px-4 py-6"
+          >
+            <div className="relative w-full h-full">
+              {/* STACK WRAPPER */}
+              <div
+                ref={trackRef}
+                className="absolute inset-0 flex flex-col items-center will-change-transform"
+                style={{
+                  viewTimelineName: "--howwework",
+                  viewTimelineAxis: "block",
+                }}
+              >
+                {steps.map((step, i) => (
+                  <div
+                    key={i}
+                    className="w-full bg-[#F1FF9C] rounded-lg px-6 py-10 mb-4 shadow-[0_0_0_1px_rgba(0,0,0,0.15)] relative overflow-hidden"
+                    style={{
+                      animationName: "stepSlideUp",
+                      animationTimeline: "--howwework",
+                      animationDuration: "1s",
+                      animationTimingFunction: "linear",
+                      animationFillMode: "both",
+                      animationDelay: `${i * 12}%`,
+                      opacity: i === 0 ? 1 : 0.92 - i * 0.06,
+                    }}
+                  >
+                    {/* INDEX */}
+                    <div className="text-[22px] text-[#444] font-bold text-center mb-3">
+                      [{i + 1}]
+                    </div>
+
+                    {/* TITLE */}
+                    <h3 className="text-center text-[32px] font-bold mb-6 text-[#101010]">
+                      {step.title}
+                    </h3>
+
+                    {/* DESC */}
+                    <p className="text-center text-[18px] leading-snug whitespace-pre-line text-[#101010]">
+                      {step.desc}
+                    </p>
+
+                    {/* GRADIENT DARKENER */}
+                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-black/10" />
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* SCROLL SPAN (важно!) */}
+            <div style={{ height: `${steps.length * 85}vh` }} />
           </div>
         )}
+
       </div>
     </section>
   );
