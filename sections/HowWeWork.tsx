@@ -237,7 +237,10 @@ export default function HowWeWork() {
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => (mobileCardsRef.current[i] = el)}
+                ref={(el) => {
+                  mobileCardsRef.current[i] = el;
+                }}
+
                 className="
                   absolute left-1/2
                   w-[90vw] max-w-[440px]
