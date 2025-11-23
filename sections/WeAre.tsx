@@ -65,7 +65,7 @@ export default function WeAre() {
         className="
           max-w-[980px] mx-auto text-center font-anybody
           leading-[1.2] tracking-tight
-          text-[32px] md:text-[58px]
+          text-[24px] md:text-[58px]
         "
       >
         {text.split(" ").map((w, i) => (

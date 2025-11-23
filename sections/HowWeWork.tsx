@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import gsap from "gsap";
 
 const steps = [
   { title: "IDEA", desc: "Discuss the task,\nfind a style, collect references." },
@@ -14,10 +13,12 @@ const steps = [
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);
+  const desktopTrackRef = useRef<HTMLDivElement | null>(null);
+  const mobileCardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
   const [isMobile, setIsMobile] = useState(false);
 
-  // detect mobile
+  // Detect mobile
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -25,96 +26,174 @@ export default function HowWeWork() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // DESKTOP: горизонтальный скролл по вертикальному
+  // ----------------------------
+  // DESKTOP horizontal scroll
+  // ----------------------------
   useLayoutEffect(() => {
     if (isMobile) return;
 
     const section = sectionRef.current;
     const sticky = stickyRef.current;
-    const track = trackRef.current;
+    const track = desktopTrackRef.current;
+
     if (!section || !sticky || !track) return;
 
     const onResize = () => {
       const vh = window.innerHeight;
-      const SCROLL_SPAN = vh * 2; // 2 экрана вертикального скролла под анимацию
-      section.style.height = `${vh + SCROLL_SPAN}px`;
+      const extra = vh * 2;
+      section.style.height = `${vh + extra}px`;
     };
-
-    onResize();
 
     const onScroll = () => {
       if (!section || !sticky || !track) return;
 
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
-      const SCROLL_SPAN = vh * 2;
+      const extra = vh * 2;
 
-      // секция не в экране — ничего не делаем
       if (rect.bottom <= 0 || rect.top >= vh) return;
 
-      // 0 (начало анимации) — когда верх секции дошёл до верха вьюпорта
-      const offsetInside = Math.min(Math.max(-rect.top, 0), SCROLL_SPAN);
-      const t = offsetInside / SCROLL_SPAN; // 0..1
+      const offsetInside = Math.min(Math.max(-rect.top, 0), extra);
+      const t = offsetInside / extra;
 
-      const containerWidth = sticky.clientWidth;
-      const contentWidth = track.scrollWidth;
-      const maxShift = Math.max(contentWidth - containerWidth, 0);
+      const cw = sticky.clientWidth;
+      const tw = track.scrollWidth;
+      const maxShift = Math.max(tw - cw, 0);
 
-      const shift = -t * maxShift;
-      gsap.set(track, { x: shift });
+      track.style.transform = `translateX(${-t * maxShift}px)`;
     };
 
-    window.addEventListener("scroll", onScroll);
-    window.addEventListener("resize", onResize);
-
-    // сразу прогнать один раз
+    onResize();
     onScroll();
 
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onScroll);
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
-      if (section) section.style.height = "";
+      window.removeEventListener("scroll", onScroll);
+      section.style.height = "";
+      track.style.transform = "";
     };
   }, [isMobile]);
 
+  // ----------------------------
+  // MOBILE stacking motion
+  // ----------------------------
+  useLayoutEffect(() => {
+    if (!isMobile) return;
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const cards = mobileCardsRef.current;
+    const n = steps.length;
+
+    const recomputeHeights = () => {
+      const vh = window.innerHeight;
+      section.style.height = `${vh + vh * (n - 1)}px`;
+    };
+
+    const onScroll = () => {
+      const sticky = stickyRef.current;
+      const section = sectionRef.current;
+      if (!sticky || !section) return;
+
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+
+      const totalScrollable = section.offsetHeight - vh;
+      if (totalScrollable <= 0) return;
+
+      const offsetInside = Math.min(Math.max(-rect.top, 0), totalScrollable);
+      const progress = offsetInside / totalScrollable;
+      const stepProgress = progress * (n - 1);
+
+      const startY = vh * 0.9; // нижняя стартовая позиция
+      const overlap = 85; // расстояние в финальном стеке
+
+      cards.forEach((card, i) => {
+        if (!card) return;
+
+        if (i === 0) {
+          card.style.transform = `translate(-50%, -50%) translateY(0px)`;
+          card.style.opacity = "0.75";
+          card.style.zIndex = "200";
+          return;
+        }
+
+        const raw = stepProgress - (i - 1);
+
+        if (raw <= 0) {
+          card.style.transform = `translate(-50%, -50%) translateY(${startY}px)`;
+          card.style.opacity = "0";
+          card.style.zIndex = `${50 - i}`;
+          return;
+        }
+
+        const stage = Math.min(raw, 1);
+        const finalY = i * overlap;
+        const y = startY + (finalY - startY) * stage;
+
+        card.style.transform = `translate(-50%, -50%) translateY(${y}px)`;
+
+        // opacity: верхние темнее, нижние светлее (как ты выбрал)
+        const finalOpacity = 0.75 + (i / (n - 1)) * 0.25;
+        const opacity = finalOpacity * stage;
+        card.style.opacity = opacity.toString();
+
+        card.style.zIndex = `${200 + i}`;
+      });
+    };
+
+    recomputeHeights();
+    onScroll();
+
+    window.addEventListener("scroll", onScroll);
+    window.addEventListener("resize", () => {
+      recomputeHeights();
+      onScroll();
+    });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [isMobile]);
+
+  // ----------------------------
+  // RENDER
+  // ----------------------------
   return (
     <section
       ref={sectionRef}
       className="relative w-full bg-black text-white overflow-visible"
+      data-scroll
     >
-      {/* sticky-контейнер на 100vh */}
-      <div
-        ref={stickyRef}
-        className="sticky top-0 h-screen flex flex-col justify-center px-6"
-      >
-        <h2 className="text-center text-5xl font-bold mb-12 pb-16">
+      <div ref={stickyRef} className="sticky top-0 h-screen flex flex-col px-4 pt-24">
+        <h2 className="text-center text-4xl md:text-5xl font-bold mb-10">
           HOW WE WORK
         </h2>
 
-        {/* DESKTOP: горизонтальные карточки */}
+        {/* DESKTOP */}
         {!isMobile && (
-          <div className="relative w-full overflow-hidden">
+          <div className="relative flex-1 flex items-center">
             <div
-              ref={trackRef}
-              className="flex gap-[24px] pl-[24px] pr-[24px]"
+              ref={desktopTrackRef}
+              className="flex gap-6 pl-6 pr-6 will-change-transform"
             >
               {steps.map((step, i) => (
                 <div
                   key={i}
-                  className="w-[40vw] min-w-[40vw] h-[340px] bg-[#F1FF9C] flex-shrink-0 px-12 py-12 rounded-[4px] shadow-[0_0_0_1px_#00000015]"
+                  className="w-[40vw] min-w-[40vw] h-[340px] bg-[#F1FF9C] px-12 py-12 shadow-[0_0_0_1px_rgba(0,0,0,0.15)]"
                 >
                   <div className="text-[#101010] h-full flex flex-col justify-between">
                     <div>
-                      <div className="text-[18px] mb-1 opacity-50">
-                        [{i + 1}]
-                      </div>
-
-                      <h3 className="text-[46px] font-bold tracking-tight mb-6">
+                      <div className="text-[18px] mb-1 opacity-50">[{i + 1}]</div>
+                      <h3 className="text-[40px] font-bold tracking-tight mb-6">
                         {step.title}
                       </h3>
                     </div>
-
-                    <p className="text-[22px] whitespace-pre-line leading-tight text-[#101010]">
+                    <p className="text-[20px] whitespace-pre-line leading-tight text-[#101010]">
                       {step.desc}
                     </p>
                   </div>
@@ -124,62 +203,35 @@ export default function HowWeWork() {
           </div>
         )}
 
+        {/* MOBILE */}
         {isMobile && (
-          <div
-            ref={stickyRef}
-            className="sticky top-0 h-screen overflow-hidden z-10 px-4 py-6"
-          >
-            <div className="relative w-full h-full">
-              {/* STACK WRAPPER */}
+          <div className="relative flex-1 mt-2">
+            {steps.map((step, i) => (
               <div
-                ref={trackRef}
-                className="absolute inset-0 flex flex-col items-center will-change-transform"
-                style={{
-                  viewTimelineName: "--howwework",
-                  viewTimelineAxis: "block",
-                }}
+                key={i}
+                ref={(el) => (mobileCardsRef.current[i] = el)}
+                className="
+                  absolute left-1/2 top-1/2
+                  w-[90vw] max-w-[440px]
+                  -translate-x-1/2 -translate-y-1/2
+                  bg-[#F1FF9C]
+                  px-6 py-8
+                  shadow-[0_0_0_1px_rgba(0,0,0,0.2)]
+                "
               >
-                {steps.map((step, i) => (
-                  <div
-                    key={i}
-                    className="w-full bg-[#F1FF9C] rounded-lg px-6 py-10 mb-4 shadow-[0_0_0_1px_rgba(0,0,0,0.15)] relative overflow-hidden"
-                    style={{
-                      animationName: "stepSlideUp",
-                      animationTimeline: "--howwework",
-                      animationDuration: "1s",
-                      animationTimingFunction: "linear",
-                      animationFillMode: "both",
-                      animationDelay: `${i * 12}%`,
-                      opacity: i === 0 ? 1 : 0.92 - i * 0.06,
-                    }}
-                  >
-                    {/* INDEX */}
-                    <div className="text-[22px] text-[#444] font-bold text-center mb-3">
-                      [{i + 1}]
-                    </div>
-
-                    {/* TITLE */}
-                    <h3 className="text-center text-[32px] font-bold mb-6 text-[#101010]">
-                      {step.title}
-                    </h3>
-
-                    {/* DESC */}
-                    <p className="text-center text-[18px] leading-snug whitespace-pre-line text-[#101010]">
-                      {step.desc}
-                    </p>
-
-                    {/* GRADIENT DARKENER */}
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-black/10" />
-                  </div>
-                ))}
+                <div className="text-center text-[18px] text-[#555] font-semibold mb-3">
+                  [{i + 1}]
+                </div>
+                <h3 className="text-center text-[26px] font-bold mb-4 text-[#101010]">
+                  {step.title}
+                </h3>
+                <p className="text-center text-[16px] leading-snug whitespace-pre-line text-[#101010]">
+                  {step.desc}
+                </p>
               </div>
-            </div>
-
-            {/* SCROLL SPAN (важно!) */}
-            <div style={{ height: `${steps.length * 85}vh` }} />
+            ))}
           </div>
         )}
-
       </div>
     </section>
   );

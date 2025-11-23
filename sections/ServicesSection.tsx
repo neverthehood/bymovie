@@ -146,43 +146,39 @@ export default function ServicesSection() {
           </>
         )}
 
-        {/* ---------- MOBILE UI ---------- */}
+        {/* ---- mobile ---- */}
         {isMobile && (
-          <div className="absolute inset-0 z-20 flex flex-col justify-end p-6">
-
-            {/* ACTIVE TITLE */}
-            <div className="text-[30px] font-black uppercase text-[#D7F000] mb-1 leading-[1.05]">
+          <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
+            <div className="text-[#D7F000] text-[32px] font-black uppercase">
               {services[active].title}
             </div>
 
-            {/* ACTIVE SUBTITLE */}
-            <div className="text-[16px] text-white/90 leading-snug mb-8 whitespace-pre-line">
+            <div className="text-white/90 text-[18px] mt-2 whitespace-pre-line">
               {services[active].subtitle}
             </div>
 
-            {/* MOBILE LIST */}
-            <div className="flex flex-col gap-2 mb-8">
+            <div className="flex flex-col gap-3 mt-6 opacity-90 mb-10">
               {services.map((s, i) => (
-                <button
+                <div
                   key={s.title}
-                  onClick={() => setActive(i)}
+                  onClick={() =>
+                    window.scrollTo({
+                      top:
+                        sectionRef.current!.offsetTop + i * window.innerHeight,
+                      behavior: "smooth",
+                    })
+                  }
                   className={`
-                    text-left font-bold uppercase transition-all
-                    ${i === active 
-                      ? "text-[#D7F000] text-[22px] leading-[1.1]"   /* МЕНЬШЕ */
-                      : "text-white/30 text-[20px] leading-[1.35]"    /* НОРМА */
-                    }
+                    uppercase text-[22px] font-bold transition-all
+                    ${i === active ? "text-[#D7F000]" : "text-white/30"}
                   `}
                 >
                   {s.title}
-                </button>
+                </div>
               ))}
             </div>
-
           </div>
         )}
-
-
       </div>
     </section>
   );
