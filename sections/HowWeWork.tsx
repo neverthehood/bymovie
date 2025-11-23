@@ -198,7 +198,7 @@ export default function HowWeWork() {
         ref={stickyRef}
         className="sticky overflow-hidden top-0 h-screen flex flex-col px-4 pt-44"
       >
-        <h2 className="text-center text-4xl md:text-5xl mb-7.5rem font-bold !mb-28">
+        <h2 className="text-center text-4xl md:text-5xl font-bold !mb-28 !-mt-20">
           HOW WE WORK
         </h2>
 
