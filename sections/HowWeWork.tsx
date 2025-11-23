@@ -231,7 +231,7 @@ export default function HowWeWork() {
     >
       <div
         ref={stickyRef}
-        className="sticky top-0 h-screen flex flex-col px-4 pt-44" /* big pt to push header+stack down */
+        className="sticky overflow-hidden top-0 h-screen flex flex-col px-4 pt-44" /* big pt to push header+stack down */
       >
         <h2 className="text-center text-4xl md:text-5xl font-bold mb-6">
           HOW WE WORK
