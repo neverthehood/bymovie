@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
 const steps = [
   { title: "IDEA", desc: "Discuss the task,\nfind a style, collect references." },
@@ -13,36 +14,28 @@ const steps = [
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
+
+  // DESKTOP track
   const desktopTrackRef = useRef<HTMLDivElement | null>(null);
+
+  // MOBILE cards
   const mobileCardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Монтируемся + определяем мобильный брейкпоинт
+  // detect mobile
   useEffect(() => {
     setIsMounted(true);
 
-    const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => setIsMobile(mq.matches);
-
-    update();
-
-    const handler = () => update();
-    if (typeof mq.addEventListener === "function") {
-      mq.addEventListener("change", handler);
-      return () => mq.removeEventListener("change", handler);
-    } else {
-      // старые браузеры
-      // @ts-ignore
-      mq.addListener(handler);
-      // @ts-ignore
-      return () => mq.removeListener(handler);
-    }
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   // ----------------------------
-  // DESKTOP: горизонтальный скролл трека
+  // DESKTOP — ВОЗВРАЩАЕМ СТАРУЮ ПРАВИЛЬНУЮ АНИМАЦИЮ
   // ----------------------------
   useLayoutEffect(() => {
     if (!isMounted || isMobile) return;
@@ -50,57 +43,55 @@ export default function HowWeWork() {
     const section = sectionRef.current;
     const sticky = stickyRef.current;
     const track = desktopTrackRef.current;
+
     if (!section || !sticky || !track) return;
 
-    let SCROLL_SPAN = 0;
+    const onResize = () => {
+      const vh = window.innerHeight;
+      const SCROLL_SPAN = vh * 2; // старая корректная длина анимации
+      section.style.height = `${vh + SCROLL_SPAN}px`;
+    };
+
+    onResize();
 
     const onScroll = () => {
-      if (!section || !sticky || !track || SCROLL_SPAN === 0) return;
+      if (!section || !sticky || !track) return;
 
-      const scrollY = window.scrollY;
-      const start = section.offsetTop; // где начинается секция
-      const offsetInside = Math.min(
-        Math.max(scrollY - start, 0),
-        SCROLL_SPAN
-      ); // 0..SCROLL_SPAN
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const SCROLL_SPAN = vh * 2;
 
-      const t = offsetInside / SCROLL_SPAN; // 0..1 — прогресс анимации
+      // секция вне экрана → ничего не делаем
+      if (rect.bottom <= 0 || rect.top >= vh) return;
+
+      const offsetInside = Math.min(Math.max(-rect.top, 0), SCROLL_SPAN);
+      const t = offsetInside / SCROLL_SPAN;
 
       const containerWidth = sticky.clientWidth;
       const contentWidth = track.scrollWidth;
       const maxShift = Math.max(contentWidth - containerWidth, 0);
 
       const shift = -t * maxShift;
-      track.style.transform = `translateX(${shift}px)`;
+
+      gsap.set(track, { x: shift });
     };
 
-    const onResize = () => {
-      const vh = window.innerHeight;
-
-      // сколько вертикального скролла отдаём под анимацию
-      SCROLL_SPAN = vh * 2.5; // стало дольше, надо прокрутить больше
-
-      // высота секции = высота экрана (pin) + span анимации
-      section.style.height = `${vh + SCROLL_SPAN}px`;
-
-      // сразу пересчитать позицию
-      onScroll();
-    };
-
-    onResize();
+    window.addEventListener("scroll", onScroll);
     window.addEventListener("resize", onResize);
-    window.addEventListener("scroll", onScroll, { passive: true });
+
+    onScroll(); // сразу обновить
 
     return () => {
-      window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+
       section.style.height = "";
       track.style.transform = "";
     };
   }, [isMounted, isMobile]);
 
   // ----------------------------
-  // MOBILE: стек карточек (лёгкое наползание)
+  // MOBILE — НАША НОВАЯ АНИМАЦИЯ НЕ МЕНЯЕТСЯ
   // ----------------------------
   useLayoutEffect(() => {
     if (!isMounted || !isMobile) return;
@@ -111,7 +102,7 @@ export default function HowWeWork() {
     const cards = mobileCardsRef.current;
     const n = steps.length;
 
-    // Параметры стека
+    // ↓↓↓ все параметры остаются как в твоём последнем рабочем варианте ↓↓↓
     const FIRST_STACK_TOP_VH = 0.42;
     const CARD_HEIGHT_VH = 0.44;
     const SEPARATOR_PX = 20;
@@ -134,8 +125,8 @@ export default function HowWeWork() {
       if (totalScrollable <= 0) return;
 
       const offsetInside = Math.min(Math.max(-rect.top, 0), totalScrollable);
-      const progress = offsetInside / totalScrollable; // 0..1
-      const stepProgress = progress * (n - 1); // 0..(n-1)
+      const progress = offsetInside / totalScrollable;
+      const stepProgress = progress * (n - 1);
 
       const cardHeight = Math.round(vh * CARD_HEIGHT_VH);
       const overlapPx = Math.round(cardHeight * OVERLAP_RATIO);
@@ -191,11 +182,7 @@ export default function HowWeWork() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       section.style.height = "";
-      cards.forEach((card) => {
-        if (!card) return;
-        card.style.transform = "";
-        card.style.zIndex = "";
-      });
+      cards.forEach((c) => c && (c.style.transform = ""));
     };
   }, [isMounted, isMobile]);
 
@@ -206,7 +193,6 @@ export default function HowWeWork() {
     <section
       ref={sectionRef}
       className="relative w-full bg-black text-white overflow-visible"
-      data-scroll
     >
       <div
         ref={stickyRef}
@@ -216,12 +202,12 @@ export default function HowWeWork() {
           HOW WE WORK
         </h2>
 
-        {/* DESKTOP */}
+        {/* DESKTOP — возвращённый трек */}
         {isMounted && !isMobile && (
           <div className="relative flex-1 flex items-center">
             <div
               ref={desktopTrackRef}
-              className="flex gap-6 pl-6 pr-6 will-change-transform"
+              className="flex gap-[24px] pl-[24px] pr-[24px] will-change-transform"
             >
               {steps.map((step, i) => (
                 <div
@@ -245,15 +231,13 @@ export default function HowWeWork() {
           </div>
         )}
 
-        {/* MOBILE */}
+        {/* MOBILE — оставляем как есть */}
         {isMounted && isMobile && (
           <div className="relative flex-1 mt-0">
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => {
-                  mobileCardsRef.current[i] = el;
-                }}
+                ref={(el) => (mobileCardsRef.current[i] = el)}
                 className="
                   absolute left-1/2
                   w-[90vw] max-w-[440px]
