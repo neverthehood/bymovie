@@ -103,14 +103,14 @@ export default function HowWeWork() {
     const n = steps.length;
 
     // ↓↓↓ все параметры остаются как в твоём последнем рабочем варианте ↓↓↓
-    const FIRST_STACK_TOP_VH = 0.42;
+    const FIRST_STACK_TOP_VH = 0.32;
     const CARD_HEIGHT_VH = 0.44;
     const SEPARATOR_PX = 20;
     const OVERLAP_RATIO = 0.28;
 
     const recomputeHeights = () => {
       const vh = window.innerHeight;
-      section.style.height = `${vh + vh * (n - 1)}px`;
+      section.style.height = `${vh + vh * 0.55 * (n - 1)}px`;
     };
 
     const onScroll = () => {
