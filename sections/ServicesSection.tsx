@@ -8,6 +8,8 @@ export default function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const subtitleRef = useRef<HTMLDivElement | null>(null);
+
+  // titleRefs хранит DOM-узлы для desktop списка заголовков
   const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [active, setActive] = useState(0);
@@ -29,9 +31,7 @@ export default function ServicesSection() {
       const sec = sectionRef.current;
       if (!sec) return;
 
-      const rect = sec.getBoundingClientRect();
       const sectionTop = sec.offsetTop;
-
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
 
@@ -85,15 +85,11 @@ export default function ServicesSection() {
       }}
     >
       {/* sticky viewport (always 100vh) */}
-      <div
-        ref={stickyRef}
-        className="sticky top-0 h-screen overflow-hidden"
-      >
+      <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden">
         {/* ---- background videos ---- */}
-        <div className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
-          style={{
-            transform: `translateY(-${active * 100}%)`,
-          }}
+        <div
+          className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
+          style={{ transform: `translateY(-${active * 100}%)` }}
         >
           {services.map((s, i) => (
             <video
@@ -119,10 +115,10 @@ export default function ServicesSection() {
               {services.map((s, i) => (
                 <div
                   key={s.title}
-                  ref={(el) => {
-                    mobileCardsRef.current[i] = el;
+                  // Блоковый ref-callback, явно типизированный, возвращает void
+                  ref={(el: HTMLDivElement | null) => {
+                    titleRefs.current[i] = el;
                   }}
-
                   onClick={() => {
                     window.scrollTo({
                       top: sectionRef.current!.offsetTop + i * window.innerHeight,
@@ -151,36 +147,37 @@ export default function ServicesSection() {
         {/* ---- mobile ---- */}
         {isMobile && (
           <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
-            <div className="text-[#D7F000] text-[32px] font-black uppercase">
-              {services[active].title}
-            </div>
-
-            <div className="text-white/90 text-[18px] mt-2 whitespace-pre-line">
-              {services[active].subtitle}
-            </div>
-
-            <div className="flex flex-col gap-3 mt-6 opacity-90 mb-10">
+            <div className="flex flex-col gap-4 opacity-90 mb-10">
               {services.map((s, i) => (
-                <div
-                  key={s.title}
-                  onClick={() =>
-                    window.scrollTo({
-                      top:
-                        sectionRef.current!.offsetTop + i * window.innerHeight,
-                      behavior: "smooth",
-                    })
-                  }
-                  className={`
-                    uppercase text-[22px] font-bold transition-all
-                    ${i === active ? "text-[#D7F000]" : "text-white/30"}
-                  `}
-                >
-                  {s.title}
+                <div key={s.title}>
+                  {/* Заголовок */}
+                  <div
+                    onClick={() =>
+                      window.scrollTo({
+                        top: sectionRef.current!.offsetTop + i * window.innerHeight,
+                        behavior: "smooth",
+                      })
+                    }
+                    className={`
+                      uppercase text-[26px] leading-[1] font-bold transition-all 
+                      ${i === active ? "text-[#D7F000]" : "text-white/30"}
+                    `}
+                  >
+                    {s.title}
+                  </div>
+
+                  {/* Подзаголовок под активным пунктом */}
+                  {i === active && (
+                    <div className="text-white/90 text-[18px] mt-1 whitespace-pre-line">
+                      {s.subtitle}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
+
       </div>
     </section>
   );

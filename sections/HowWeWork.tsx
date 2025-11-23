@@ -16,21 +16,37 @@ export default function HowWeWork() {
   const desktopTrackRef = useRef<HTMLDivElement | null>(null);
   const mobileCardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
+  // mounted guard + mobile flag
+  const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile
+  // Detect mobile using matchMedia + mounted guard
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    setIsMounted(true);
+
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      const mobile = mq.matches;
+      setIsMobile(mobile);
+    };
+
+    update();
+
+    const handler = () => update();
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    } else {
+      mq.addListener(handler);
+      return () => mq.removeListener(handler);
+    }
   }, []);
 
   // ----------------------------
-  // DESKTOP horizontal scroll
+  // DESKTOP horizontal scroll (unchanged)
   // ----------------------------
   useLayoutEffect(() => {
-    if (isMobile) return;
+    if (!isMounted || isMobile) return;
 
     const section = sectionRef.current;
     const sticky = stickyRef.current;
@@ -75,13 +91,13 @@ export default function HowWeWork() {
       section.style.height = "";
       track.style.transform = "";
     };
-  }, [isMobile]);
+  }, [isMounted, isMobile]);
 
   // ----------------------------
-  // MOBILE stacking motion
+  // MOBILE stacking motion (stacked layout -> slight napolzanie on scroll)
   // ----------------------------
   useLayoutEffect(() => {
-    if (!isMobile) return;
+    if (!isMounted || !isMobile) return;
 
     const section = sectionRef.current;
     if (!section) return;
@@ -89,8 +105,30 @@ export default function HowWeWork() {
     const cards = mobileCardsRef.current;
     const n = steps.length;
 
+    // Tunable parameters:
+    // FIRST_STACK_TOP_VH - how far from viewport top the first card top sits in initial stacked layout
+    // CARD_HEIGHT_VH - card height (fraction of vh)
+    // SEPARATOR_PX - visible gap between stacked cards initially
+    // OVERLAP_RATIO - how much next card overlaps previous when stopped (fraction of card height)
+    // Adjusted to keep headings visible and move stack lower
+    // ↓↓↓ ТУТ МЕНЯЕМ ТОЛЬКО ЭТИ ПАРАМЕТРЫ ↓↓↓
+
+    // сколько первая карточка опущена вниз (0.42 идеальное значение)
+    const FIRST_STACK_TOP_VH = 0.42;
+
+    // высота карточки
+    const CARD_HEIGHT_VH = 0.44;
+
+    // расстояние между карточками в сложенном состоянии (можно оставить)
+    const SEPARATOR_PX = 20;
+
+    // насколько сильно карточки наползают друг на друга (делаем меньше!)
+    const OVERLAP_RATIO = 0.28;
+
+
     const recomputeHeights = () => {
       const vh = window.innerHeight;
+      // section tall enough so sticky locks while all cards arrive
       section.style.height = `${vh + vh * (n - 1)}px`;
     };
 
@@ -106,50 +144,61 @@ export default function HowWeWork() {
       if (totalScrollable <= 0) return;
 
       const offsetInside = Math.min(Math.max(-rect.top, 0), totalScrollable);
-      const progress = offsetInside / totalScrollable;
-      const stepProgress = progress * (n - 1);
+      const progress = offsetInside / totalScrollable; // 0..1
+      const stepProgress = progress * (n - 1); // 0..(n-1)
 
-      const startY = vh * 0.9; // нижняя стартовая позиция
-      const overlap = 85; // расстояние в финальном стеке
+      // px constants
+      const cardHeight = Math.round(vh * CARD_HEIGHT_VH);
+      const overlapPx = Math.round(cardHeight * OVERLAP_RATIO);
 
-      cards.forEach((card, i) => {
-        if (!card) return;
+      // initial stacked top (top of first card) in px relative to viewport
+      const firstStackTop = Math.round(vh * FIRST_STACK_TOP_VH);
 
-        if (i === 0) {
-          card.style.transform = `translate(-50%, -50%) translateY(0px)`;
-          card.style.opacity = "0.75";
-          card.style.zIndex = "200";
-          return;
-        }
+      // viewport center
+      const centerY = Math.round(vh / 2);
 
+      for (let i = 0; i < n; i++) {
+        const card = cards[i];
+        if (!card) continue;
+
+        // stacked top (px) - vertical column with separator
+        const stackedTop = firstStackTop + i * (cardHeight + SEPARATOR_PX);
+        const stackedCenterOffset = stackedTop - centerY + Math.round(cardHeight / 2);
+
+        // final top in overlapped layout (smaller gap -> overlap)
+        const finalTop = firstStackTop + i * overlapPx;
+        const finalCenterOffset = finalTop - centerY + Math.round(cardHeight / 2);
+
+        // local progress for card i
         const raw = stepProgress - (i - 1);
 
+        if (i === 0) {
+          // first card pinned (keep it below header, visible)
+          card.style.transform = `translate(-50%, -50%) translateY(${finalCenterOffset}px)`;
+          card.style.zIndex = `${600}`;
+          continue;
+        }
+
         if (raw <= 0) {
-          card.style.transform = `translate(-50%, -50%) translateY(${startY}px)`;
-          card.style.opacity = "0";
-          card.style.zIndex = `${50 - i}`;
-          return;
+          // still in stacked layout
+          card.style.transform = `translate(-50%, -50%) translateY(${stackedCenterOffset}px)`;
+          card.style.zIndex = `${100 + i}`;
+          continue;
         }
 
         const stage = Math.min(raw, 1);
-        const finalY = i * overlap;
-        const y = startY + (finalY - startY) * stage;
+        // interpolate stacked->final (very subtle napolzanie)
+        const offset = Math.round(stackedCenterOffset + (finalCenterOffset - stackedCenterOffset) * stage);
 
-        card.style.transform = `translate(-50%, -50%) translateY(${y}px)`;
-
-        // opacity: верхние темнее, нижние светлее (как ты выбрал)
-        const finalOpacity = 0.75 + (i / (n - 1)) * 0.25;
-        const opacity = finalOpacity * stage;
-        card.style.opacity = opacity.toString();
-
-        card.style.zIndex = `${200 + i}`;
-      });
+        card.style.transform = `translate(-50%, -50%) translateY(${offset}px)`;
+        card.style.zIndex = `${600 + i}`;
+      }
     };
 
     recomputeHeights();
     onScroll();
 
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", () => {
       recomputeHeights();
       onScroll();
@@ -157,8 +206,19 @@ export default function HowWeWork() {
 
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", () => {
+        recomputeHeights();
+        onScroll();
+      });
+      // cleanup inline styles (optional)
+      section.style.height = "";
+      cards.forEach((card) => {
+        if (!card) return;
+        card.style.transform = "";
+        card.style.zIndex = "";
+      });
     };
-  }, [isMobile]);
+  }, [isMounted, isMobile]);
 
   // ----------------------------
   // RENDER
@@ -169,13 +229,16 @@ export default function HowWeWork() {
       className="relative w-full bg-black text-white overflow-visible"
       data-scroll
     >
-      <div ref={stickyRef} className="sticky top-0 h-screen flex flex-col px-4 pt-24">
-        <h2 className="text-center text-4xl md:text-5xl font-bold mb-10">
+      <div
+        ref={stickyRef}
+        className="sticky top-0 h-screen flex flex-col px-4 pt-44" /* big pt to push header+stack down */
+      >
+        <h2 className="text-center text-4xl md:text-5xl font-bold mb-6">
           HOW WE WORK
         </h2>
 
-        {/* DESKTOP */}
-        {!isMobile && (
+        {/* DESKTOP (unchanged) */}
+        {isMounted && !isMobile && (
           <div className="relative flex-1 flex items-center">
             <div
               ref={desktopTrackRef}
@@ -203,17 +266,17 @@ export default function HowWeWork() {
           </div>
         )}
 
-        {/* MOBILE */}
-        {isMobile && (
-          <div className="relative flex-1 mt-2">
+        {/* MOBILE (stack) */}
+        {isMounted && isMobile && (
+          <div className="relative flex-1 mt-0">
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => (mobileCardsRef.current[i] = el)}
+                ref={(el) => { mobileCardsRef.current[i] = el; }}
                 className="
-                  absolute left-1/2 top-1/2
+                  absolute left-1/2
                   w-[90vw] max-w-[440px]
-                  -translate-x-1/2 -translate-y-1/2
+                  -translate-x-1/2
                   bg-[#F1FF9C]
                   px-6 py-8
                   shadow-[0_0_0_1px_rgba(0,0,0,0.2)]
