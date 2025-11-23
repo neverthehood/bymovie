@@ -36,12 +36,23 @@ export default function ServicesSection() {
       const vh = window.innerHeight;
 
       // how far we scrolled *inside* the long section
-      const progress = (scrollY - sectionTop) / vh;
+      const progress = (scrollY - sectionTop) / vh*4;
 
       // snap to integer safely
-      let idx = Math.round(progress);
+      let idx;
+
+      // мобильная версия — менее чувствительное переключение
+      if (isMobile) {
+        const zone = 0.5; // ← нужно прокрутить 80% экрана для смены пункта
+        idx = Math.floor(progress / zone);
+      } else {
+        const zone = 0.4; // 60% экрана требуется прокрутить
+        idx = Math.floor(progress);
+      }
+
 
       idx = Math.max(0, Math.min(services.length - 1, idx));
+
 
       if (idx !== active) {
         setActive(idx);
@@ -81,7 +92,7 @@ export default function ServicesSection() {
       ref={sectionRef}
       className="relative w-full bg-black text-white"
       style={{
-        height: `${services.length * 100}vh`, // VERY IMPORTANT
+        height: `${services.length * 40}vh`, // VERY IMPORTANT
       }}
     >
       {/* sticky viewport (always 100vh) */}

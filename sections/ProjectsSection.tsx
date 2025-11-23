@@ -5,7 +5,7 @@ import Image from "next/image";
 const projects = [
   { id: 1, img: "/assets/projects/1.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
   { id: 2, img: "/assets/projects/2.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
-  { id: 3, img: "/assets/projects/3.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
+  { id: 3, img: "/assets/projects/6.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
   { id: 4, img: "/assets/projects/4.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
   { id: 5, img: "/assets/projects/5.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
   { id: 6, img: "/assets/projects/6.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
