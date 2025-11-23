@@ -119,11 +119,10 @@ export default function ServicesSection() {
               {services.map((s, i) => (
                 <div
                   key={s.title}
-                  ref={(el) => { mobileCardsRef.current[i] = el; }}
+                  ref={(el: HTMLDivElement | null) => { mobileCardsRef.current[i] = el; }}
                   onClick={() => {
                     window.scrollTo({
-                      top:
-                        sectionRef.current!.offsetTop + i * window.innerHeight,
+                      top: sectionRef.current!.offsetTop + i * window.innerHeight,
                       behavior: "smooth",
                     });
                   }}
