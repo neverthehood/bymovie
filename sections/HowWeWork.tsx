@@ -105,8 +105,8 @@ export default function HowWeWork() {
     // ↓↓↓ все параметры остаются как в твоём последнем рабочем варианте ↓↓↓
     const FIRST_STACK_TOP_VH = 0.32;
     const CARD_HEIGHT_VH = 0.44;
-    const SEPARATOR_PX = 20;
-    const OVERLAP_RATIO = 0.23;
+    const SEPARATOR_PX = 30;
+    const OVERLAP_RATIO = 0.29;
 
     const recomputeHeights = () => {
       const vh = window.innerHeight;
@@ -246,7 +246,7 @@ export default function HowWeWork() {
                   absolute left-1/2
                   w-[90vw] max-w-[440px]
                   -translate-x-1/2
-                  bg-[#F1FF9C]
+                  bg-[#D7F000]
                   px-6 py-8
                   shadow-[0_0_0_1px_rgba(0,0,0,0.2)]
                 "
