@@ -53,6 +53,7 @@ export default function WeAre() {
 
   return (
     <section
+      id="weare"
       ref={ref}
       data-scroll
       className="

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-black text-white pt-28 pb-0 px-6 lg:px-20">
+    <footer id="contacts" className="w-full bg-black text-white pt-28 pb-0 px-6 lg:px-20">
       
       {/* MAIN GRID */}
       <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">

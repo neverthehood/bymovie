@@ -43,7 +43,7 @@ export default function ServicesSection() {
 
       // мобильная версия — менее чувствительное переключение
       if (isMobile) {
-        const zone = 0.5; // ← нужно прокрутить 80% экрана для смены пункта
+        const zone = 0.7; // ← нужно прокрутить 80% экрана для смены пункта
         idx = Math.floor(progress / zone);
       } else {
         const zone = 0.4; // 60% экрана требуется прокрутить
@@ -89,6 +89,7 @@ export default function ServicesSection() {
 
   return (
     <section
+      id="services"
       ref={sectionRef}
       className="relative w-full bg-black text-white"
       style={{
