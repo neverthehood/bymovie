@@ -213,7 +213,7 @@ export default function HowWeWork() {
               {steps.map((step, i) => (
                 <div
                   key={i}
-                  className="w-[40vw] min-w-[40vw] h-[340px] bg-[#F1FF9C] px-12 py-12 shadow-[0_0_0_1px_rgba(0,0,0,0.15)]"
+                  className="w-[40vw] min-w-[40vw] h-[340px] bg-[#DBFE02] px-12 py-12 shadow-[0_0_0_1px_rgba(0,0,0,0.15)]"
                 >
                   <div className="text-[#101010] h-full flex flex-col justify-between">
                     <div>

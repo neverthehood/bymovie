@@ -28,7 +28,7 @@ export default function Navbar() {
         </div>
 
         {/* CENTER LOGO */}
-        <div className="text-[#D7F000] font-bold uppercase tracking-[0.28em] text-2xl">
+        <div className="text-[#D7F000] font-bold uppercase tracking-[0.18em] text-2xl">
           BY MOVIE
         </div>
 

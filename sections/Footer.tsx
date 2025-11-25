@@ -54,9 +54,9 @@ export default function Footer() {
 
             {/* small icons row */}
             <div className="flex gap-4 text-3xl mt-4 text-white/40">
-              <span>📨</span>
-              <span>📞</span>
-              <span>💬</span>
+              <img src="/icons/telegram.svg" alt="telegram" className="w-8 h-8 opacity-40 hover:opacity-100 transition-opacity duration-300" />
+              <img src="/icons/whatsapp.svg" alt="whatsapp" className="w-8 h-8 opacity-40 hover:opacity-100 transition-opacity duration-300" />
+              <img src="/icons/viber.svg" alt="viber" className="w-8 h-8 opacity-40 hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>
 

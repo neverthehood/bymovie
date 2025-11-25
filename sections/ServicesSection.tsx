@@ -81,7 +81,7 @@ export default function ServicesSection() {
     const centerY = tRect.top + tRect.height / 2 - sRect.top;
 
     gsap.to(subtitle, {
-      y: centerY - 40,
+      y: centerY -30,
       duration: 0.4,
       ease: "power2.out",
     });
@@ -93,7 +93,7 @@ export default function ServicesSection() {
       ref={sectionRef}
       className="relative w-full bg-black text-white"
       style={{
-        height: `${services.length * 40}vh`, // VERY IMPORTANT
+        height: `${services.length * 40 - 10}vh`, // VERY IMPORTANT
       }}
     >
       {/* sticky viewport (always 100vh) */}
@@ -131,15 +131,10 @@ export default function ServicesSection() {
                   ref={(el: HTMLDivElement | null) => {
                     titleRefs.current[i] = el;
                   }}
-                  onClick={() => {
-                    window.scrollTo({
-                      top: sectionRef.current!.offsetTop + i * window.innerHeight,
-                      behavior: "smooth",
-                    });
-                  }}
+                  onClick={() => setActive(i)}
                   className={`
                     uppercase text-4xl font-bold cursor-pointer transition-all
-                    ${i === active ? "text-[#D7F000] scale-105" : "text-white/30"}
+                    ${i === active ? "text-[#DBFE02] scale-105" : "text-white/30"}
                   `}
                 >
                   {s.title}
@@ -172,7 +167,7 @@ export default function ServicesSection() {
                     }
                     className={`
                       uppercase text-[26px] leading-[1] font-bold transition-all 
-                      ${i === active ? "text-[#D7F000]" : "text-white/30"}
+                      ${i === active ? "text-[#DBFE02]" : "text-white/30"}
                     `}
                   >
                     {s.title}
