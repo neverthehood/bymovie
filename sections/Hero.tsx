@@ -160,11 +160,25 @@ export default function Hero() {
 
           <button
             ref={buttonRef}
-            className="absolute bottom-8 right-8 z-50 rounded-full bg-[#D7F000]
-              px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-black"
+            className="
+              fixed bottom-8 right-8 z-50
+              rounded-full
+              px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em]
+              text-black
+
+              bg-gradient-to-r from-[#D7F000] via-[#F7FF65] to-[#D7F000]
+              bg-[length:200%_200%]
+              animate-[gradientMove_6s_ease_infinite]
+
+              shadow-[0_0_12px_rgba(215,240,0,0.4)]
+              transition-all duration-300
+              hover:scale-105 hover:shadow-[0_0_20px_rgba(215,240,0,0.8)]
+              active:scale-95
+            "
           >
             BY MOVIE VP PAVILION
           </button>
+
 
           <div ref={maskWrapperRef} className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
             <div
