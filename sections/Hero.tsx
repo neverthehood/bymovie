@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import Loader from "@/components/Loader";
+import Link from "next/link";
 
 export default function Hero() {
   const [loaded, setLoaded] = useState(false);
@@ -158,6 +159,13 @@ export default function Hero() {
             </h1>
           </div>
 
+          <Link
+            href="/vp"
+            className="fixed bottom-8 right-8 z-50 rounded-full 
+                       bg-[#D7F000] px-6 py-2 text-xs font-semibold uppercase
+                       tracking-[0.18em] text-black
+                       transition-all duration-300"
+          >
           <button
             ref={buttonRef}
             className="
@@ -178,7 +186,7 @@ export default function Hero() {
           >
             BY MOVIE VP PAVILION
           </button>
-
+          </Link>
 
           <div ref={maskWrapperRef} className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
             <div
