@@ -106,7 +106,7 @@ export default function HowWeWork() {
     const FIRST_STACK_TOP_VH = 0.32;
     const CARD_HEIGHT_VH = 0.44;
     const SEPARATOR_PX = 30;
-    const OVERLAP_RATIO = 0.29;
+    const OVERLAP_RATIO = 0.35;
 
     const recomputeHeights = () => {
       const vh = window.innerHeight;
