@@ -161,16 +161,8 @@ export default function Hero() {
 
           <Link
             href="/vp"
-            className="fixed bottom-8 right-8 z-50 rounded-full 
-                       bg-[#D7F000] px-6 py-2 text-xs font-semibold uppercase
-                       tracking-[0.18em] text-black
-                       transition-all duration-300"
-          >
-          <button
-            ref={buttonRef}
             className="
-              fixed bottom-8 right-8 z-50
-              rounded-full
+              fixed bottom-8 right-8 z-50 rounded-full
               px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em]
               text-black
 
@@ -185,8 +177,8 @@ export default function Hero() {
             "
           >
             BY MOVIE VP PAVILION
-          </button>
           </Link>
+
 
           <div ref={maskWrapperRef} className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
             <div
@@ -230,14 +222,8 @@ export default function Hero() {
           </div>
           <Link
             href="/vp"
-            className="fixed bottom-8 right-8 z-50 rounded-full 
-                       bg-[#D7F000] px-6 py-2 text-xs font-semibold uppercase
-                       tracking-[0.18em] text-black
-                       transition-all duration-300"
-          >
-          <button
-            ref={mButton}
-            className="absolute bottom-6 right-6 z-[999] rounded-full
+            className="
+              absolute bottom-8 right-8 z-50 rounded-full
               px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em]
               text-black
 
@@ -248,11 +234,12 @@ export default function Hero() {
               shadow-[0_0_12px_rgba(215,240,0,0.4)]
               transition-all duration-300
               hover:scale-105 hover:shadow-[0_0_20px_rgba(215,240,0,0.8)]
-              active:scale-95"
+              active:scale-95
+            "
           >
             BY MOVIE VP PAVILION
-          </button>
           </Link>
+
 
           <div ref={mWrapper} className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
             <div
