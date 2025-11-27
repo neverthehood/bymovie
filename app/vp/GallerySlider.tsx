@@ -72,7 +72,6 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
         {/* Заголовок + стрелки */}
         <div className="mb-8 flex justify-between items-center">
           <h2 className="text-white font-anybody text-xl tracking-[0.25em] uppercase">
-            Our Team
           </h2>
 
           <div className="flex gap-3">
