@@ -11,7 +11,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
   // --- создаём длинную шину, чтобы loop был реально бесконечным ---
   const base = images;
-  const repeats = 20; // можно 30 если хочешь вообще “вечную дорожку”
+  const repeats = 30; // можно 30 если хочешь вообще “вечную дорожку”
   const extended = Array.from({ length: repeats }, () => base).flat();
 
   const middleIndex = Math.floor((extended.length / 2));
