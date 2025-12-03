@@ -99,24 +99,21 @@ export default function ServicesSection() {
       {/* sticky viewport (always 100vh) */}
       <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden">
         {/* ---- background videos ---- */}
+        {/* ---- background IMAGES ---- */}
         <div
           className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
           style={{ transform: `translateY(-${active * 100}%)` }}
         >
           {services.map((s, i) => (
-            <video
+            <img
               key={i}
+              src={s.img}          // IMPORTANT: new field
+              alt={s.title}
               className="h-screen w-full object-cover flex-shrink-0"
-              muted
-              autoPlay
-              loop
-              playsInline
-            >
-              <source src={s.webm} type="video/webm" />
-              <source src={s.mp4} type="video/mp4" />
-            </video>
+            />
           ))}
         </div>
+
 
         <div className="absolute inset-0 bg-black/45" />
 
