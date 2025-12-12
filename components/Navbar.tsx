@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import Image from "next/image";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function Navbar() {
       {/* DESKTOP NAV */}
       <nav
         className="
-          fixed top-0 left-0 w-full z-[999] 
+          fixed -top-5 left-0 w-full z-[999] 
           hidden md:flex items-center justify-between 
           px-16 py-8 
           text-white text-base tracking-[0.18em]
@@ -27,10 +28,17 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* CENTER LOGO */}
-        <div className="text-[#D7F000] font-bold uppercase tracking-[0.18em] text-2xl">
-          BY MOVIE
-        </div>
+        {/* CENTER LOGO — заменён на картинку */}
+        <a href="/" className="flex items-center justify-center">
+          <Image
+            src="/images/logo.png"
+            alt="BYMOVIE Logo"
+            width={160}
+            height={40}
+            className="object-contain"
+            priority
+          />
+        </a>
 
         {/* RIGHT */}
         <div className="flex gap-44">
@@ -42,13 +50,21 @@ export default function Navbar() {
           </a>
         </div>
       </nav>
-      {/* ← ВАЖНО: этот </nav> теперь стоит правильно */}
 
       {/* MOBILE NAV TOP BAR */}
       <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-6 text-white">
-        <div className="text-[#D7F000] font-bold uppercase tracking-[0.25em]">
-          BY MOVIE
-        </div>
+        
+        {/* MOBILE LOGO — тоже картинка */}
+        <a href="/" className="flex items-center">
+          <Image
+            src="/images/logo.png"
+            alt="BYMOVIE Logo"
+            width={120}
+            height={32}
+            className="object-contain"
+            priority
+          />
+        </a>
 
         <button onClick={() => setOpen(true)}>
           <FiMenu size={26} />
@@ -58,32 +74,21 @@ export default function Navbar() {
       {/* MOBILE FULLSCREEN MENU */}
       {open && (
         <div
-          className={`
+          className="
             fixed inset-0 bg-black z-[9999]
             flex flex-col items-center justify-center
             text-white text-3xl gap-10 uppercase
             tracking-[0.2em]
-          `}
+          "
         >
-          <button
-            className="absolute top-6 right-6"
-            onClick={() => setOpen(false)}
-          >
+          <button className="absolute top-6 right-6" onClick={() => setOpen(false)}>
             <FiX size={28} />
           </button>
 
-          <a href="#weare" onClick={() => setOpen(false)}>
-            We Are
-          </a>
-          <a href="#services" onClick={() => setOpen(false)}>
-            Services
-          </a>
-          <a href="#projects" onClick={() => setOpen(false)}>
-            Projects
-          </a>
-          <a href="#contacts" onClick={() => setOpen(false)}>
-            Contacts
-          </a>
+          <a href="#weare" onClick={() => setOpen(false)}>We Are</a>
+          <a href="#services" onClick={() => setOpen(false)}>Services</a>
+          <a href="#projects" onClick={() => setOpen(false)}>Projects</a>
+          <a href="#contacts" onClick={() => setOpen(false)}>Contacts</a>
         </div>
       )}
     </>

@@ -4,12 +4,28 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 const steps = [
-  { title: "IDEA", desc: "Discuss the task,\nfind a style, collect references." },
-  { title: "PRE-PRODUCTION", desc: "Creating a 3D-scene in Unreal Engine..." },
-  { title: "SHOOTING", desc: "Choosing the type of technology..." },
-  { title: "POST-PRODUCTION", desc: "Editing, VFX, compositing..." },
-  { title: "DONE", desc: "Releasing your masterpiece" },
+  {
+    title: "IDEA",
+    desc: "Discuss the task,\nfind a style, collect references."
+  },
+  {
+    title: "PRE-PRODUCTION",
+    desc: "Creating a 3D-scene in Unreal Engine.\nCity, forest, interior, space — everything is possible."
+  },
+  {
+    title: "SHOOTING",
+    desc: "Choosing the type of technology:\nLED-filming or on live chromakey.\nWe can realize everything on the set."
+  },
+  {
+    title: "POST-PRODUCTION",
+    desc: "Editing, VFX, compositing, color grading.\nFinal touches or nothing if everything is ready at once."
+  },
+  {
+    title: "DONE",
+    desc: "Releasing your masterpiece."
+  }
 ];
+
 
 export default function HowWeWork() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -21,80 +37,101 @@ export default function HowWeWork() {
   // MOBILE cards
   const mobileCardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const [isMounted, setIsMounted] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // detect mobile
+  // Detect mobile
   useEffect(() => {
-    setIsMounted(true);
+    setMounted(true);
 
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
+
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ----------------------------
-  // DESKTOP — ВОЗВРАЩАЕМ СТАРУЮ ПРАВИЛЬНУЮ АНИМАЦИЮ
-  // ----------------------------
+ // ------------------------------------------------------
+ // DESKTOP — BOOSTED OVERLAP so all cards appear at final
+ // ------------------------------------------------------
+ useLayoutEffect(() => {
+   if (!mounted || isMobile) return;
+
+   const section = sectionRef.current;
+   const sticky = stickyRef.current;
+   const track = desktopTrackRef.current;
+   if (!section || !sticky || !track) return;
+
+   const cards = Array.from(track.children) as HTMLElement[];
+   const n = cards.length;
+
+   const overlapBoost = 1.75; // ← ключевой параметр (1.6–1.9 идеально)
+
+   const onResize = () => {
+     const vh = window.innerHeight;
+     const scrollSpan = vh * 2;
+     section.style.height = `${vh + scrollSpan}px`;
+   };
+
+   onResize();
+
+   const onScroll = () => {
+     const rect = section.getBoundingClientRect();
+     const vh = window.innerHeight;
+     const scrollSpan = vh * 2;
+
+     const offset = Math.min(Math.max(-rect.top, 0), scrollSpan);
+     const progress = offset / scrollSpan;
+
+     const cardWidth = cards[0].offsetWidth;
+     const viewportWidth = sticky.clientWidth;
+
+     // минимальное значение чтобы последняя вошла
+     const baseOverlap = (viewportWidth - cardWidth) / (n - 1);
+
+     // увеличиваем overlap, чтобы ВСЕ карточки были видны
+     const overlapPx = baseOverlap * overlapBoost;
+
+     // первая карточка — фиксирована
+     gsap.set(cards[0], { x: 0 });
+
+     for (let i = 1; i < n; i++) {
+       const card = cards[i];
+
+       // старт
+       const startX = i * (cardWidth + 200);
+
+       // boosted финальная позиция
+       const finalX = -i * overlapPx;
+
+       // каскадное движение
+       const localProgress = Math.min(
+         Math.max(progress * (n - 1) - (i - 1), 0),
+         1
+       );
+
+       const x = startX + (finalX - startX) * localProgress;
+
+       gsap.set(card, { x });
+     }
+   };
+
+   window.addEventListener("scroll", onScroll);
+   window.addEventListener("resize", onResize);
+   onScroll();
+
+   return () => {
+     window.removeEventListener("scroll", onScroll);
+     window.removeEventListener("resize", onResize);
+   };
+ }, [mounted, isMobile]);
+
+
+  // ------------------------------------------------------
+  // MOBILE FIXED — earlier movement + safe bottom offset
+  // ------------------------------------------------------
   useLayoutEffect(() => {
-    if (!isMounted || isMobile) return;
-
-    const section = sectionRef.current;
-    const sticky = stickyRef.current;
-    const track = desktopTrackRef.current;
-
-    if (!section || !sticky || !track) return;
-
-    const onResize = () => {
-      const vh = window.innerHeight;
-      const SCROLL_SPAN = vh * 2; // старая корректная длина анимации
-      section.style.height = `${vh + SCROLL_SPAN}px`;
-    };
-
-    onResize();
-
-    const onScroll = () => {
-      if (!section || !sticky || !track) return;
-
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const SCROLL_SPAN = vh * 2;
-
-      // секция вне экрана → ничего не делаем
-      if (rect.bottom <= 0 || rect.top >= vh) return;
-
-      const offsetInside = Math.min(Math.max(-rect.top, 0), SCROLL_SPAN);
-      const t = offsetInside / SCROLL_SPAN;
-
-      const containerWidth = sticky.clientWidth;
-      const contentWidth = track.scrollWidth;
-      const maxShift = Math.max(contentWidth - containerWidth, 0);
-
-      const shift = -t * maxShift;
-
-      gsap.set(track, { x: shift });
-    };
-
-    window.addEventListener("scroll", onScroll);
-    window.addEventListener("resize", onResize);
-
-    onScroll(); // сразу обновить
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-
-      section.style.height = "";
-      track.style.transform = "";
-    };
-  }, [isMounted, isMobile]);
-
-  // ----------------------------
-  // MOBILE — НАША НОВАЯ АНИМАЦИЯ НЕ МЕНЯЕТСЯ
-  // ----------------------------
-  useLayoutEffect(() => {
-    if (!isMounted || !isMobile) return;
+    if (!mounted || !isMobile) return;
 
     const section = sectionRef.current;
     if (!section) return;
@@ -102,68 +139,67 @@ export default function HowWeWork() {
     const cards = mobileCardsRef.current;
     const n = steps.length;
 
-    // ↓↓↓ все параметры остаются как в твоём последнем рабочем варианте ↓↓↓
-    const FIRST_STACK_TOP_VH = 0.32;
-    const CARD_HEIGHT_VH = 0.44;
-    const SEPARATOR_PX = 30;
-    const OVERLAP_RATIO = 0.35;
+    const FIRST_TOP_VH = 0.32;
+    const CARD_H_VH = 0.44;
+    const SEPARATOR = 30;
+    const OVERLAP = 0.35;
+    const EARLY = 0.2; // start earlier
 
     const recomputeHeights = () => {
       const vh = window.innerHeight;
-      section.style.height = `${vh + vh * 0.55 * (n - 1)}px`;
+      const cardH = vh * CARD_H_VH;
+      section.style.height = `${vh + (cardH * 1.1) * (n - 1)}px`;
     };
 
     const onScroll = () => {
       const sticky = stickyRef.current;
-      const sec = sectionRef.current;
-      if (!sticky || !sec) return;
+      if (!sticky) return;
 
-      const rect = sec.getBoundingClientRect();
+      const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
+      const total = section.offsetHeight - vh;
 
-      const totalScrollable = sec.offsetHeight - vh;
-      if (totalScrollable <= 0) return;
+      if (total <= 0) return;
 
-      const offsetInside = Math.min(Math.max(-rect.top, 0), totalScrollable);
-      const progress = offsetInside / totalScrollable;
+      const offsetInside = Math.min(Math.max(-rect.top, 0), total);
+      const progress = offsetInside / total;
       const stepProgress = progress * (n - 1);
 
-      const cardHeight = Math.round(vh * CARD_HEIGHT_VH);
-      const overlapPx = Math.round(cardHeight * OVERLAP_RATIO);
-      const firstStackTop = Math.round(vh * FIRST_STACK_TOP_VH);
+      const cardH = Math.round(vh * CARD_H_VH);
+      const overlapPx = Math.round(cardH * OVERLAP);
+      const firstTop = Math.round(vh * FIRST_TOP_VH);
       const centerY = Math.round(vh / 2);
 
       for (let i = 0; i < n; i++) {
         const card = cards[i];
         if (!card) continue;
 
-        const stackedTop = firstStackTop + i * (cardHeight + SEPARATOR_PX);
-        const stackedCenterOffset =
-          stackedTop - centerY + Math.round(cardHeight / 2);
+        const stackedTop = firstTop + i * (cardH + SEPARATOR);
+        const stackedOffset =
+          stackedTop - centerY + Math.round(cardH / 2);
 
-        const finalTop = firstStackTop + i * overlapPx;
-        const finalCenterOffset =
-          finalTop - centerY + Math.round(cardHeight / 2);
+        const finalTop = firstTop + i * overlapPx;
+        const finalOffset =
+          finalTop - centerY + Math.round(cardH / 2);
 
-        const raw = stepProgress - (i - 1);
+        // FIX: start animation earlier
+        const raw = stepProgress - (i - 1) + EARLY;
 
         if (i === 0) {
-          card.style.transform = `translate(-50%, -50%) translateY(${finalCenterOffset}px)`;
+          card.style.transform = `translate(-50%, -50%) translateY(${finalOffset}px)`;
           card.style.zIndex = "600";
           continue;
         }
 
         if (raw <= 0) {
-          card.style.transform = `translate(-50%, -50%) translateY(${stackedCenterOffset}px)`;
+          card.style.transform = `translate(-50%, -50%) translateY(${stackedOffset}px)`;
           card.style.zIndex = `${100 + i}`;
           continue;
         }
 
         const stage = Math.min(raw, 1);
-        const offset = Math.round(
-          stackedCenterOffset +
-            (finalCenterOffset - stackedCenterOffset) * stage
-        );
+        const offset =
+          stackedOffset + (finalOffset - stackedOffset) * stage;
 
         card.style.transform = `translate(-50%, -50%) translateY(${offset}px)`;
         card.style.zIndex = `${600 + i}`;
@@ -184,11 +220,11 @@ export default function HowWeWork() {
       section.style.height = "";
       cards.forEach((c) => c && (c.style.transform = ""));
     };
-  }, [isMounted, isMobile]);
+  }, [mounted, isMobile]);
 
-  // ----------------------------
+  // ------------------------------------------------------
   // RENDER
-  // ----------------------------
+  // ------------------------------------------------------
   return (
     <section
       id="howwework"
@@ -203,12 +239,12 @@ export default function HowWeWork() {
           HOW WE WORK
         </h2>
 
-        {/* DESKTOP — возвращённый трек */}
-        {isMounted && !isMobile && (
+        {/* DESKTOP */}
+        {!isMobile && mounted && (
           <div className="relative flex-1 flex items-center">
             <div
               ref={desktopTrackRef}
-              className="flex gap-[24px] pl-[24px] pr-[24px] will-change-transform"
+              className="relative flex gap-[24px] pl-[24px] pr-[24px] will-change-transform"
             >
               {steps.map((step, i) => (
                 <div
@@ -232,16 +268,13 @@ export default function HowWeWork() {
           </div>
         )}
 
-        {/* MOBILE — оставляем как есть */}
-        {isMounted && isMobile && (
+        {/* MOBILE */}
+        {isMobile && mounted && (
           <div className="relative flex-1 mt-0">
             {steps.map((step, i) => (
               <div
                 key={i}
-                ref={(el) => {
-                  mobileCardsRef.current[i] = el;
-                }}
-
+                ref={(el) => (mobileCardsRef.current[i] = el)}
                 className="
                   absolute left-1/2
                   w-[90vw] max-w-[440px]

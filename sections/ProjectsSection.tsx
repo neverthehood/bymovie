@@ -1,26 +1,150 @@
 "use client";
-import { useState, useEffect } from "react";
-import Image from "next/image";
+
+import { useState, useEffect, useCallback } from "react";
 
 const projects = [
-  { id: 1, img: "/assets/projects/1.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
-  { id: 2, img: "/assets/projects/2.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
-  { id: 3, img: "/assets/projects/6.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
-  { id: 4, img: "/assets/projects/4.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
-  { id: 5, img: "/assets/projects/5.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
-  { id: 6, img: "/assets/projects/6.png", title: "M Le Monde – The Dutch Touch", author: "Jean-Baptiste Talbourdet Napoleone", category: "Commercials" },
+  {
+    id: 1,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Black.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Black.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 2,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/BY%20Movie.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/BY%20Movie.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 3,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/DINO.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/DINO.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 4,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/MATIES_VKYS_OTBORNOJ_SELDI_RB_30sec_FHD_preview.webm",
+    poster:
+      "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/MATIES_VKYS_OTBORNOJ_SELDI_RB_30sec_FHD_preview.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 5,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Police%20in%20Paris_%D1%8F%D1%81%D1%8C_By%20Movie.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Police%20in%20Paris_%D1%8F%D1%81%D1%8C_By%20Movie.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 6,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 7,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Tiser%20BY%20Movie%20Virtual%20Production%20_%20Mars%20_.webm",
+    poster:
+      "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Tiser%20BY%20Movie%20Virtual%20Production%20_%20Mars%20_.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 8,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 9,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Trailer%20Chess.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Trailer%20Chess.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 10,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Video%20Reel_2024.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Video%20Reel_2024.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
+  {
+    id: 11,
+    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/%D0%A7%D1%91%D1%80%D0%BD%D1%8B%D0%B9%20%D1%80%D1%8B%D0%BD%D0%BE%D0%BA%20_%20%D0%9C%D0%B8%D1%80%20%D1%82%D0%B0%D0%BD%D0%BA%D0%BE%D0%B2.webm",
+    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/%D0%A7%D1%91%D1%80%D0%BD%D1%8B%D0%B9%20%D1%80%D1%8B%D0%BD%D0%BE%D0%BA%20_%20%D0%9C%D0%B8%D1%80%20%D1%82%D0%B0%D0%BD%D0%BA%D0%BE%D0%B2.jpg",
+    title: "M Le Monde – The Dutch Touch",
+    author: "Jean-Baptiste Talbourdet Napoleone",
+    category: "Commercials",
+  },
 ];
 
 export default function ProjectsSection() {
   const [active, setActive] = useState<number | null>(null);
+  const [modalIndex, setModalIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  // swipe-down support
+  const [touchStartY, setTouchStartY] = useState(0);
+  const [touchCurrentY, setTouchCurrentY] = useState(0);
+
+  // mobile detection
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // ESC close modal
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModalIndex(null);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  const closeModal = useCallback(() => setModalIndex(null), []);
+
+  const next = () => {
+    if (modalIndex === null) return;
+    setModalIndex((modalIndex + 1) % projects.length);
+  };
+
+  const prev = () => {
+    if (modalIndex === null) return;
+    setModalIndex((modalIndex - 1 + projects.length) % projects.length);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchCurrentY(e.touches[0].clientY);
+  };
+
+  const onTouchEnd = () => {
+    if (touchCurrentY - touchStartY > 80) closeModal();
+    setTouchCurrentY(0);
+  };
 
   return (
     <section id="projects" className="w-full bg-black text-white pt-28 pb-40">
@@ -37,34 +161,33 @@ export default function ProjectsSection() {
           return (
             <div
               key={idx}
+              onClick={() => setModalIndex(idx)}
               onMouseEnter={() => !isMobile && setActive(idx)}
               onMouseLeave={() => !isMobile && setActive(null)}
-              className={`
-                relative w-full overflow-hidden cursor-pointer
-                transition-all duration-300
-                ${
-                  !isMobile && active !== null && !isActive
-                    ? "blur-sm brightness-[0.45]"
-                    : ""
-                }
+              className={`relative w-full overflow-hidden cursor-pointer transition-all duration-300
+                ${!isMobile && active !== null && !isActive ? "blur-sm brightness-[0.45]" : ""}
                 ${isMobile ? "h-[480px]" : "h-[420px]"}
               `}
             >
-              <Image
-                src={p.img}
-                alt={p.title}
-                fill
-                priority={idx < 3}
-                className="object-cover transition-all duration-700"
+              {/* VIDEO PREVIEW */}
+              <video
+                src={p.video}
+                poster={p.poster}
+                muted
+                loop
+                playsInline
+                autoPlay={isMobile}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700
+                  ${isActive ? "opacity-100" : isMobile ? "opacity-100" : "opacity-80"}
+                `}
               />
 
+              {/* Decorative corners */}
               {!isMobile && (
                 <div
-                  className={`
-                    pointer-events-none absolute inset-0 
-                    transition-all duration-300
-                    ${isActive ? "opacity-100" : "opacity-0"}
-                  `}
+                  className={`pointer-events-none absolute inset-0 transition-all duration-300 ${
+                    isActive ? "opacity-100" : "opacity-0"
+                  }`}
                 >
                   <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#D7F000]" />
                   <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#D7F000]" />
@@ -73,10 +196,9 @@ export default function ProjectsSection() {
                 </div>
               )}
 
+              {/* Text overlay */}
               <div
-                className={`
-                  absolute bottom-6 left-6 max-w-[70%]
-                  text-white leading-tight transition-all duration-300
+                className={`absolute bottom-6 left-6 max-w-[70%] leading-tight transition-all duration-300
                   ${
                     isMobile
                       ? "opacity-100 translate-y-0 text-base"
@@ -94,6 +216,55 @@ export default function ProjectsSection() {
           );
         })}
       </div>
+
+      {/* MODAL */}
+      {modalIndex !== null && (
+        <div
+          className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn"
+          onClick={closeModal}
+        >
+          <div
+            className="relative max-w-[90vw] max-h-[90vh] scale-95 animate-scaleIn"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            <video
+              src={projects[modalIndex].video}
+              poster={projects[modalIndex].poster}
+              controls
+              autoPlay
+              playsInline
+              className="w-full h-full object-contain rounded-lg"
+            />
+
+            {/* Close */}
+            <button
+              className="absolute -top-10 right-0 text-white text-4xl"
+              onClick={closeModal}
+            >
+              ×
+            </button>
+
+            {/* Prev */}
+            <button
+              className="absolute left-[-60px] top-1/2 -translate-y-1/2 text-white text-4xl hidden md:block"
+              onClick={prev}
+            >
+              ‹
+            </button>
+
+            {/* Next */}
+            <button
+              className="absolute right-[-60px] top-1/2 -translate-y-1/2 text-white text-4xl hidden md:block"
+              onClick={next}
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -19,7 +19,7 @@ export const services = [
   },
   {
     id: 3,
-    title: "3D LOCATION & CHARACTER DEVELOPMENT",
+    title: "3D LOCATION & CHARACTER CREATION",
     subtitle: "Any style: realism, sci-fi, stylization. \nUnreal Engine inside.",
     img: "/assets/services/3d.webp"
   },
