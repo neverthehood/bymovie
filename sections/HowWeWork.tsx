@@ -148,8 +148,12 @@ export default function HowWeWork() {
     const recomputeHeights = () => {
       const vh = window.innerHeight;
       const cardH = vh * CARD_H_VH;
-      section.style.height = `${vh + (cardH * 1.1) * (n - 1)}px`;
+
+      const extraBottom = vh * 0.25; // ← добавляем 25% экрана снизу
+
+      section.style.height = `${vh + (cardH * 1.1) * (n - 1) + extraBottom}px`;
     };
+
 
     const onScroll = () => {
       const sticky = stickyRef.current;
