@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import Image from "next/image";
 
 export default function NavbarVP() {
   const [open, setOpen] = useState(false);
@@ -28,11 +29,15 @@ export default function NavbarVP() {
         </div>
 
         {/* CENTER LOGO */}
-        <a
-          href="/"
-          className="text-[#D7F000] font-bold uppercase tracking-[0.18em] text-2xl"
-        >
-          BY MOVIE
+        <a href="/" className="flex items-center justify-center">
+          <Image
+            src="/images/logo.png"
+            alt="BYMOVIE Logo"
+            width={160}
+            height={40}
+            className="object-contain"
+            priority
+          />
         </a>
 
         {/* RIGHT */}
@@ -47,12 +52,15 @@ export default function NavbarVP() {
       </nav>
 
       {/* MOBILE NAV TOP BAR */}
-      <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-6 text-white">
-        <a
-          href="/"
-          className="text-[#D7F000] font-bold uppercase tracking-[0.25em]"
-        >
-          BY MOVIE
+      <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-5 text-white">
+        <a href="/" className="flex items-center">
+          <Image
+            src="/images/logo.png"
+            alt="BYMOVIE Logo"
+            width={120}
+            height={32}
+            className="object-contain"
+          />
         </a>
 
         <button onClick={() => setOpen(true)}>
@@ -66,8 +74,7 @@ export default function NavbarVP() {
           className="
             fixed inset-0 bg-black z-[9999]
             flex flex-col items-center justify-center
-            text-white text-3xl gap-10 uppercase
-            tracking-[0.2em]
+            text-white text-3xl gap-10 uppercase tracking-[0.2em]
           "
         >
           <button
@@ -77,18 +84,21 @@ export default function NavbarVP() {
             <FiX size={28} />
           </button>
 
-          <a href="/#weare" onClick={() => setOpen(false)}>
-            We Are
+          {/* LOGO INSIDE MOBILE MENU */}
+          <a href="/" onClick={() => setOpen(false)} className="mb-8">
+            <Image
+              src="/images/logo.png"
+              alt="BYMOVIE Logo"
+              width={160}
+              height={40}
+              className="object-contain"
+            />
           </a>
-          <a href="/#services" onClick={() => setOpen(false)}>
-            Services
-          </a>
-          <a href="/#projects" onClick={() => setOpen(false)}>
-            Projects
-          </a>
-          <a href="/#contacts" onClick={() => setOpen(false)}>
-            Contacts
-          </a>
+
+          <a href="/#weare" onClick={() => setOpen(false)}>We Are</a>
+          <a href="/#services" onClick={() => setOpen(false)}>Services</a>
+          <a href="/#projects" onClick={() => setOpen(false)}>Projects</a>
+          <a href="/#contacts" onClick={() => setOpen(false)}>Contacts</a>
         </div>
       )}
     </>
