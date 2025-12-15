@@ -12,7 +12,7 @@ export default function NavbarVP() {
       {/* DESKTOP NAV */}
       <nav
         className="
-          fixed top-0 left-0 w-full z-[999]
+          fixed -top-4 left-0 w-full z-[999]
           hidden md:flex items-center justify-between
           px-16 py-8
           text-white text-base tracking-[0.18em]

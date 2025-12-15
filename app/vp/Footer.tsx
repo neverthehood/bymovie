@@ -22,13 +22,13 @@ export default function Footer() {
             excited about any creative challenges
           </p>
 
-          {/* SOCIAL ICONS — single row on mobile */}
-          <div className="flex gap-10 text-xl flex-wrap">
-            <a href="#" className="hover:text-[#D7F000] transition">Instagram</a>
-            <a href="#" className="hover:text-[#D7F000] transition">Telegram</a>
-            <a href="#" className="hover:text-[#D7F000] transition">WhatsApp</a>
+            {/* SOCIAL ICONS — single row on mobile */}
+            <div className="flex gap-10 text-xl flex-wrap">
+              <a href="https://www.instagram.com/bymovie_production/" className="hover:text-[#D7F000] transition">Instagram</a>
+              <a href="https://www.youtube.com/@ByMovieProduction" className="hover:text-[#D7F000] transition">YouTube</a>
+              <a href="https://www.linkedin.com/company/by-movie-production-company/" className="hover:text-[#D7F000] transition">LinkedIn</a>
+            </div>
           </div>
-        </div>
 
         {/* RIGHT SIDE */}
         <div className="text-xl">
@@ -56,7 +56,6 @@ export default function Footer() {
             <div className="flex gap-4 text-3xl mt-4 text-white/40">
               <img src="/icons/telegram.svg" alt="telegram" className="w-8 h-8 opacity-40 hover:opacity-100 transition-opacity duration-300" />
               <img src="/icons/whatsapp.svg" alt="whatsapp" className="w-8 h-8 opacity-40 hover:opacity-100 transition-opacity duration-300" />
-              <img src="/icons/viber.svg" alt="viber" className="w-8 h-8 opacity-40 hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>
 
@@ -84,7 +83,7 @@ export default function Footer() {
       {/* YELLOW BACKGROUND LOGO */}
       <div className="w-full mt-6">
         <Image
-          src="/assets/footer/BY MOVIE.png"
+          src="/assets/footer/BY MOVIE.svg"
           alt="BY MOVIE"
           width={3000}
           height={1000}
