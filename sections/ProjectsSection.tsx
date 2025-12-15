@@ -61,14 +61,7 @@ const projects = [
     author: "Jean-Baptiste Talbourdet Napoleone",
     category: "Commercials",
   },
-  {
-    id: 8,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.webm",
-    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.jpg",
-    title: "M Le Monde – The Dutch Touch",
-    author: "Jean-Baptiste Talbourdet Napoleone",
-    category: "Commercials",
-  },
+
   {
     id: 9,
     video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Trailer%20Chess.webm",
