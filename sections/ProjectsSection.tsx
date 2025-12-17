@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+
 
 const projects = [
   {
@@ -126,6 +127,9 @@ export default function ProjectsSection() {
     if (touchCurrentY - touchStartY > 80) closeModal();
     setTouchCurrentY(0);
   };
+
+
+
 
   return (
     <section id="projects" className="w-full bg-black text-white pt-28 pb-40">

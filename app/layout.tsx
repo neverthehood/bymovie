@@ -6,7 +6,10 @@ const anybody = Anybody({
   subsets: ["latin"],
   weight: ["300", "400", "600", "800", "900"],
   variable: "--font-anybody",
+  display: "swap", 
+  preload: true,   
 });
+
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bymovie.studio"),
@@ -24,7 +27,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.png",
     apple: "/favicon.png",
   },
-  
+
   openGraph: {
     type: "website",
     url: "https://bymovie.studio",
