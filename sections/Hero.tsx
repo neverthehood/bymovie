@@ -134,11 +134,13 @@ export default function Hero() {
         <div className="hidden md:block relative h-screen w-full overflow-hidden">
 
           <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 h-full w-full object-cover"
+            ref={videoRef}
+  muted
+  loop
+  playsInline
+  preload="metadata"
+  poster="/assets/hero-poster.webp"
+  className="absolute inset-0 h-full w-full object-cover opacity-0"
           >
             <source src="https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/12_ShowReel_BY_Movie_004.webm" type="video/webm" />
             <source src="/assets/video/hero.mp4" type="video/mp4" />
