@@ -20,11 +20,11 @@ export const metadata: Metadata = {
     "BY MOVIE is a virtual production studio specializing in LED walls, Unreal Engine, and real-time virtual environments.",
 
   icons: {
-    icon: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/fi.png",
-    shortcut: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/fi.png",
-    apple: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/fi.png",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
-
+  
   openGraph: {
     type: "website",
     url: "https://bymovie.studio",
