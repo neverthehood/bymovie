@@ -62,11 +62,28 @@ export default function Footer() {
           {/* LOCATIONS */}
           <div className="mb-10">
             <div className="text-white/60 mb-2 text-base">Locations</div>
+
             <div className="text-4xl leading-snug">
-              Minsk<br />
-              Warsaw
+              <div>
+                Minsk
+                <div className="text-base text-white/60 leading-tight mt-1">
+                  P. Brovki 30/5
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <a
+                  href="https://www.sevafx.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#D7F000] transition"
+                >
+                  Warsaw
+                </a>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
 

@@ -11,9 +11,18 @@ const anybody = Anybody({
 export const metadata: Metadata = {
   title: "BY MOVIE",
   description: "Virtual production studio",
+  icons: {
+    icon: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/fi.png",
+    shortcut: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/fi.png",
+    apple: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/fi.png",
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body className={`${anybody.variable} font-anybody`}>
