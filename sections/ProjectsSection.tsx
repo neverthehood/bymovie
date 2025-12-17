@@ -68,7 +68,7 @@ const projects = [
     category: "TVC",
   },
   {
-    id: 9,
+    id: 10,
     video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Trailer%20Chess.webm",
     poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Trailer%20Chess.jpg",
     title: "Chess",
@@ -190,7 +190,6 @@ export default function ProjectsSection() {
                 `}
               >
                 <div className="text-white/80 mb-1">{p.title}</div>
-                <div className="text-white/60">{p.author}</div>
                 <div className="text-white/40">{p.category}</div>
               </div>
             </div>
