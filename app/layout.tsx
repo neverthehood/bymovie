@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     siteName: "BY MOVIE",
     images: [
       {
-        url: "/images/og.jpg",
+        url: "/images/og.png",
         width: 1200,
         height: 630,
         alt: "BY MOVIE — Virtual Production Studio",
