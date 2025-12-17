@@ -130,20 +130,21 @@ export default function ProjectsSection() {
             >
               {/* 🎥 VIDEO */}
               <video
-                ref={(el) => {
-                  videoRefs.current[idx] = el;
-                }}
-                src={p.video}
-                poster={p.poster}
-                muted
-                loop
-                playsInline
-                preload="none"
-                autoPlay={isMobile}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500
-                  ${isActive || isMobile ? "opacity-100" : "opacity-80"}
-                `}
-              />
+  ref={(el) => {
+    videoRefs.current[idx] = el;
+  }}
+  src={p.video}
+  poster={p.poster}
+  muted
+  loop
+  playsInline
+  preload="metadata"
+  autoPlay={isMobile}
+  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500
+    ${isActive || isMobile ? "opacity-100" : "opacity-80"}
+  `}
+/>
+
 
               {/* TEXT */}
               <div
