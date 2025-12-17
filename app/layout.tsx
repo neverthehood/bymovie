@@ -1,4 +1,14 @@
-﻿export const metadata: Metadata = {
+﻿import type { Metadata } from "next";
+import "./globals.css";
+import { Anybody } from "next/font/google";
+
+const anybody = Anybody({
+  subsets: ["latin"],
+  weight: ["300", "400", "600", "800", "900"],
+  variable: "--font-anybody",
+});
+
+export const metadata: Metadata = {
   metadataBase: new URL("https://bymovie.studio"),
 
   title: {
@@ -7,7 +17,7 @@
   },
 
   description:
-    "BY MOVIE is a virtual production studio specializing in LED walls, Unreal Engine, and real-time virtual environments for commercials, films, and branded content.",
+    "BY MOVIE is a virtual production studio specializing in LED walls, Unreal Engine, and real-time virtual environments.",
 
   icons: {
     icon: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/fi.png",
@@ -24,7 +34,7 @@
     siteName: "BY MOVIE",
     images: [
       {
-        url: "/images/og.jpg", // положи файл в public/images/og.jpg
+        url: "/images/og.jpg",
         width: 1200,
         height: 630,
         alt: "BY MOVIE — Virtual Production Studio",
@@ -45,3 +55,17 @@
     follow: true,
   },
 };
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className={`${anybody.variable} font-anybody antialiased`}>
+        {children}
+      </body>
+    </html>
+  );
+}
