@@ -105,11 +105,11 @@ export default function Hero() {
   return (
     <>
       {!loaded && (
-        <Loader
-          onFinished={() => setLoaded(true)}
-          className="fixed inset-0 z-[9999]"
-        />
+        <div className="fixed inset-0 z-[9999]">
+          <Loader onFinished={() => setLoaded(true)} />
+        </div>
       )}
+
 
       <section className="relative w-full overflow-hidden bg-black">
         {/* DESKTOP */}
