@@ -261,13 +261,13 @@ export default function HowWeWork() {
                 className="absolute left-1/2 w-[90vw] max-w-[440px]
                   -translate-x-1/2 bg-[#D7F000] px-6 py-8"
               >
-                <div className="text-center opacity-50 mb-3">
+                <div className="text-[#101010] text-center opacity-50 mb-3">
                   [{i + 1}]
                 </div>
-                <h3 className="text-center text-2xl font-bold mb-4">
+                <h3 className="text-[#101010] text-center text-2xl font-bold mb-4">
                   {s.title}
                 </h3>
-                <p className="text-center whitespace-pre-line">
+                <p className="text-[#101010] text-center whitespace-pre-line">
                   {s.desc}
                 </p>
               </div>
