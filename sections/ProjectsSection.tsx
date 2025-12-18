@@ -20,7 +20,7 @@ const projects = [
   {
     id: 3,
     video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Mercedes-Benz%20EQS%20-%20Existing%20Now%281%29.webm",
-    poster: "https://dash.cloudflare.com/f3f0e080c846ea2f9040a8012e3cf8a6/r2/default/buckets/bymovie/objects/%25D0%25A1%25D0%25BD%25D0%25B8%25D0%25BC%25D0%25BE%25D0%25BA-%25D1%258D%25D0%25BA%25D1%2580%25D0%25B0%25D0%25BD%25D0%25B0-2025-12-17-005628.webp",
+    poster: "https://f3f0e080c846ea2f9040a8012e3cf8a6.r2.cloudflarestorage.com/bymovie/Снимок-экрана-2025-12-17-005628.webp",
     title: "Mercedes-Benz EQS - Existing Now",
     category: "TVC",
   },
