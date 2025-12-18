@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const projects = [
   {
@@ -80,11 +80,11 @@ export default function ProjectsSection() {
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // swipe-down support
+  const modalVideoRef = useRef<HTMLVideoElement | null>(null);
+
   const [touchStartY, setTouchStartY] = useState(0);
   const [touchCurrentY, setTouchCurrentY] = useState(0);
 
-  // mobile detection
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -92,7 +92,6 @@ export default function ProjectsSection() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ESC close modal
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") setModalIndex(null);
@@ -100,6 +99,13 @@ export default function ProjectsSection() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  useEffect(() => {
+    if (modalIndex !== null && modalVideoRef.current) {
+      modalVideoRef.current.currentTime = 0;
+      modalVideoRef.current.play().catch(() => {});
+    }
+  }, [modalIndex]);
 
   const closeModal = useCallback(() => setModalIndex(null), []);
 
@@ -140,7 +146,7 @@ export default function ProjectsSection() {
 
           return (
             <div
-              key={idx}
+              key={p.id}
               onClick={() => setModalIndex(idx)}
               onMouseEnter={() => !isMobile && setActive(idx)}
               onMouseLeave={() => !isMobile && setActive(null)}
@@ -149,7 +155,6 @@ export default function ProjectsSection() {
                 ${isMobile ? "h-[480px]" : "h-[420px]"}
               `}
             >
-              {/* VIDEO PREVIEW */}
               <video
                 src={p.video}
                 poster={p.poster}
@@ -157,12 +162,9 @@ export default function ProjectsSection() {
                 loop
                 playsInline
                 autoPlay={isMobile}
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700
-                  ${isActive ? "opacity-100" : isMobile ? "opacity-100" : "opacity-80"}
-                `}
+                className="absolute inset-0 w-full h-full object-cover"
               />
 
-              {/* Decorative corners */}
               {!isMobile && (
                 <div
                   className={`pointer-events-none absolute inset-0 transition-all duration-300 ${
@@ -176,15 +178,14 @@ export default function ProjectsSection() {
                 </div>
               )}
 
-              {/* Text overlay */}
               <div
-                className={`absolute bottom-6 left-6 max-w-[70%] leading-tight transition-all duration-300
+                className={`absolute bottom-6 left-6 max-w-[70%] transition-all duration-300
                   ${
                     isMobile
-                      ? "opacity-100 translate-y-0 text-base"
+                      ? "opacity-100"
                       : isActive
-                      ? "opacity-100 translate-y-0 text-sm"
-                      : "opacity-0 translate-y-2 text-sm"
+                      ? "opacity-100"
+                      : "opacity-0"
                   }
                 `}
               >
@@ -196,29 +197,28 @@ export default function ProjectsSection() {
         })}
       </div>
 
-      {/* MODAL */}
       {modalIndex !== null && (
         <div
-          className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn"
+          className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
           onClick={closeModal}
         >
           <div
-            className="relative max-w-[90vw] max-h-[90vh] scale-95 animate-scaleIn"
+            className="relative max-w-[90vw] max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
             <video
+              ref={modalVideoRef}
               src={projects[modalIndex].video}
               poster={projects[modalIndex].poster}
               controls
-              autoPlay
+              muted
               playsInline
               className="w-full h-full object-contain rounded-lg"
             />
 
-            {/* Close */}
             <button
               className="absolute -top-10 right-0 text-white text-4xl"
               onClick={closeModal}
@@ -226,7 +226,6 @@ export default function ProjectsSection() {
               ×
             </button>
 
-            {/* Prev */}
             <button
               className="absolute left-[-60px] top-1/2 -translate-y-1/2 text-white text-4xl hidden md:block"
               onClick={prev}
@@ -234,7 +233,6 @@ export default function ProjectsSection() {
               ‹
             </button>
 
-            {/* Next */}
             <button
               className="absolute right-[-60px] top-1/2 -translate-y-1/2 text-white text-4xl hidden md:block"
               onClick={next}
