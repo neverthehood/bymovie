@@ -5,14 +5,14 @@ import { useState, useEffect, useCallback } from "react";
 const projects = [
   {
     id: 1,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.webm",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/RISE_TOWER_ENG.webm",
     poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/RISE_TOWER_ENG.jpg",
     title: "Rise Tower",
     category: "TVC",
   },
   {
     id: 2,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Police%20in%20Paris_%D1%8F%D1%81%D1%8C_By%20Movie.webm",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Police%20in%20Paris_%D1%8F%D1%81%D1%8C_By%20Movie.webm",
     poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Police%20in%20Paris_%D1%8F%D1%81%D1%8C_By%20Movie.jpg",
     title: "POLICE IN PARIS",
     category: "Music video",
@@ -33,8 +33,8 @@ const projects = [
   },
   {
     id: 5,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Advertising-video-for-BELARUSBANK-Mastercard%D0%A0%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%BD%D1%8B%D0%B9-%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE%D1%80%D0%BE%D0%BB%D0%B8%D0%BA_1.webm",
-    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA-%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0-2025-12-17-014649.webp",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Advertising-video-for-BELARUSBANK-Mastercard%D0%A0%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%BD%D1%8B%D0%B9-%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE%D1%80%D0%BE%D0%BB%D0%B8%D0%BA_1.webm",
+    poster: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Belarusbank%20(1).webp",
     title: "Mastercard/Belarusbank",
     category: "TVC",
   },
@@ -47,14 +47,14 @@ const projects = [
   },
   {
     id: 7,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/%D0%A7%D1%91%D1%80%D0%BD%D1%8B%D0%B9%20%D1%80%D1%8B%D0%BD%D0%BE%D0%BA%20_%20%D0%9C%D0%B8%D1%80%20%D1%82%D0%B0%D0%BD%D0%BA%D0%BE%D0%B2.webm",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/%D0%A7%D1%91%D1%80%D0%BD%D1%8B%D0%B9%20%D1%80%D1%8B%D0%BD%D0%BE%D0%BA%20_%20%D0%9C%D0%B8%D1%80%20%D1%82%D0%B0%D0%BD%D0%BA%D0%BE%D0%B2.webm,
     poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/%D0%A7%D1%91%D1%80%D0%BD%D1%8B%D0%B9%20%D1%80%D1%8B%D0%BD%D0%BE%D0%BA%20_%20%D0%9C%D0%B8%D1%80%20%D1%82%D0%B0%D0%BD%D0%BA%D0%BE%D0%B2.jpg",
     title: "WG - Black Market",
     category: "Promo",
   },
   {
     id: 8,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/MATIES_VKYS_OTBORNOJ_SELDI_RB_30sec_FHD_preview.webm",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/MATIES_VKYS_OTBORNOJ_SELDI_RB_30sec_FHD_preview.webm",
     poster:
       "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/MATIES_VKYS_OTBORNOJ_SELDI_RB_30sec_FHD_preview.jpg",
     title: "MATIAS",
@@ -69,7 +69,7 @@ const projects = [
   },
   {
     id: 10,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Trailer%20Chess.webm",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Trailer%20Chess.webm",
     poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Trailer%20Chess.jpg",
     title: "Chess",
     category: "CGI for movie promo",
