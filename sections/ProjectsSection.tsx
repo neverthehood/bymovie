@@ -19,7 +19,7 @@ const projects = [
   },
   {
     id: 3,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Mercedes-Benz%20EQS%20-%20Existing%20Now%281%29.webm",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Mercedes-Benz%20EQS%20-%20Existing%20Now(1).webm",
     poster: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/mercedes-1.webp",
     title: "Mercedes-Benz EQS - Existing Now",
     category: "TVC",
