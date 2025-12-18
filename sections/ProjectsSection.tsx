@@ -26,8 +26,8 @@ const projects = [
   },
   {
     id: 4,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Blockchain-Sports-Teaser.webm",
-    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA-%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0-2025-12-17-012048.webp",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Blockchain-Sports-Teaser.webm",
+    poster: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Blockchain-Sports-Teaser.webp",
     title: "Blockchain Sports",
     category: "Teaser. TVC",
   },
@@ -40,8 +40,8 @@ const projects = [
   },
   {
     id: 6,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/JGGL.AI-COMMERCIAL.webm",
-    poster: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA-%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0-2025-12-17-012659.webp",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/JGGL.AI-COMMERCIAL.webm",
+    poster: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/JGGL.AI-COMMERCIAL.webp",
     title: "JGGL.AI",
     category: "COMMERCIAL. TVC",
   },
