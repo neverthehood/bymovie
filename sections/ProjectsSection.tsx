@@ -47,7 +47,7 @@ const projects = [
   },
   {
     id: 7,
-    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/%D0%A7%D1%91%D1%80%D0%BD%D1%8B%D0%B9%20%D1%80%D1%8B%D0%BD%D0%BE%D0%BA%20_%20%D0%9C%D0%B8%D1%80%20%D1%82%D0%B0%D0%BD%D0%BA%D0%BE%D0%B2.webm,
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/%D0%A7%D1%91%D1%80%D0%BD%D1%8B%D0%B9%20%D1%80%D1%8B%D0%BD%D0%BE%D0%BA%20_%20%D0%9C%D0%B8%D1%80%20%D1%82%D0%B0%D0%BD%D0%BA%D0%BE%D0%B2.webm",
     poster: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/black-market.webp",
     title: "WG - Black Market",
     category: "Promo",
