@@ -8,7 +8,7 @@ export default function LedWallSection() {
         {/* IMAGE */}
         <div className="max-w-[1600px] mx-auto">
           <Image
-            src="https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/BMVP_Screen-_2_-1.webp"
+            src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/BMVP_Screen-_2_.webp"
             alt="LED Wall"
             width={1600}
             height={900}
