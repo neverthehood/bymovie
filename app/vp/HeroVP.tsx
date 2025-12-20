@@ -37,7 +37,7 @@ export default function HeroVP() {
         muted
         playsInline
       >
-        <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/vp-hero.webm" type="video/webm" />
+        <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/showreel_1.webm" type="video/webm" />
       </video>
 
       {/* Overlay */}
