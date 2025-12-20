@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     "BY MOVIE is a virtual production studio specializing in LED walls, Unreal Engine, and real-time virtual environments.",
 
   icons: {
-    icon: "/favicon.png",
-    shortcut: "favicon.png",
-    apple: "/favicon.png",
+    icon: "/fi.png",
+    shortcut: "fi.png",
+    apple: "/fi.png",
   },
 
   openGraph: {
