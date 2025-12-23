@@ -6,7 +6,7 @@ export default function LedWallSection() {
       <div className="mx-auto">
 
         {/* IMAGE */}
-        <div className="w-full md:max-w-[1600px] md:mx-auto">
+        <div className="w-[90%] mx-auto md:max-w-[1600px]">
           <Image
             src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/BMVP_Screen%20(2)%201.webp"
             alt="LED Wall"
