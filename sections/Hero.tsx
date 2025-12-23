@@ -222,8 +222,8 @@ export default function Hero() {
           <Link
             href="/vp"
             className="
-              absolute bottom-8 right-8 z-50 rounded-full
-              px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em]
+              absolute bottom-24 left-1/2 -translate-x-1/2 md:right-8 z-50 rounded-full
+              px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em] whitespace-nowrap
               text-black
 
               bg-gradient-to-r from-[#D7F000] via-[#F7FF65] to-[#D7F000]
