@@ -35,30 +35,43 @@ export default function ServicesSection() {
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
 
-      // нормализованный прогресс
-      const rawProgress = (scrollY - sectionTop) / vh;
-
-      let idx = active;
-
       if (isMobile) {
-        // 🔥 MOBILE — более стабильная логика
-        const step = 0.9; // нужно почти 1 экран
-        idx = Math.round(rawProgress / step);
+        const sectionHeight = sec.offsetHeight - vh;
+
+        if (sectionHeight <= 0) return;
+
+        const progress =
+          (scrollY - sectionTop) / sectionHeight;
+
+        const clamped = Math.max(0, Math.min(1, progress));
+
+        const idx = Math.round(
+          clamped * (services.length - 1)
+        );
+
+        if (idx !== active) {
+          setActive(idx);
+        }
       } else {
-        // DESKTOP — как было
-        idx = Math.floor(rawProgress);
-      }
+        // === DESKTOP как было ===
+        const progress = (scrollY - sectionTop) / vh;
+        const idx = Math.floor(progress);
 
-      idx = Math.max(0, Math.min(services.length - 1, idx));
+        const clamped = Math.max(
+          0,
+          Math.min(services.length - 1, idx)
+        );
 
-      if (idx !== active) {
-        setActive(idx);
+        if (clamped !== active) {
+          setActive(clamped);
+        }
       }
     };
 
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, [active, isMobile]);
+
 
   // =========================
   // DESKTOP subtitle follow
