@@ -14,10 +14,10 @@ export default function ServicesSection() {
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  // MOBILE FIX: сглаженное значение прогресса
+  // mobile progress (0 → services.length)
   const mobileProgressRef = useRef(0);
 
-  // Detect mobile
+  // detect mobile
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -26,7 +26,7 @@ export default function ServicesSection() {
   }, []);
 
   //
-  // MAIN SCROLL EVENT
+  // MAIN SCROLL HANDLER
   //
   useEffect(() => {
     const handler = () => {
@@ -37,28 +37,33 @@ export default function ServicesSection() {
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
 
-      // общий прогресс секции
-      const rawProgress = (scrollY - sectionTop) / vh * 4;
-
       let idx = active;
 
       if (isMobile) {
-        // ==========================
-        // MOBILE FIX
-        // ==========================
-        const SMOOTHING = 0.035; // чем меньше — тем спокойнее
+        // ===== MOBILE — CORRECT LOGIC =====
+        const sectionHeight = sec.offsetHeight;
+        const scrollInside = scrollY - sectionTop;
+
+        const normalized =
+          scrollInside / (sectionHeight - vh);
+
+        const targetProgress =
+          normalized * services.length;
+
+        const SMOOTHING = 0.04; // спокойствие
         mobileProgressRef.current +=
-          (rawProgress - mobileProgressRef.current) * SMOOTHING;
+          (targetProgress - mobileProgressRef.current) * SMOOTHING;
 
-        const zone = 1.25; // нужно почти целый экран для смены
-        idx = Math.floor(mobileProgressRef.current / zone);
+        idx = Math.floor(mobileProgressRef.current);
 
-        // удерживаем последний пункт дольше
+        // удерживаем последний пункт
         if (idx >= services.length - 1) {
           idx = services.length - 1;
+          mobileProgressRef.current = services.length - 1;
         }
       } else {
-        // DESKTOP — НЕ ТРОГАЕМ
+        // ===== DESKTOP — НЕ ТРОГАЕМ =====
+        const rawProgress = (scrollY - sectionTop) / vh * 4;
         idx = Math.floor(rawProgress);
       }
 
@@ -88,7 +93,8 @@ export default function ServicesSection() {
     const tRect = title.getBoundingClientRect();
     const sRect = sticky.getBoundingClientRect();
 
-    const centerY = tRect.top + tRect.height / 2 - sRect.top;
+    const centerY =
+      tRect.top + tRect.height / 2 - sRect.top;
 
     gsap.to(subtitle, {
       y: centerY - 30,
@@ -103,10 +109,15 @@ export default function ServicesSection() {
       ref={sectionRef}
       className="relative w-full bg-black text-white"
       style={{
-        height: `${services.length * 40 - 10}vh`,
+        height: isMobile
+          ? `${services.length * 70 + 40}vh`
+          : `${services.length * 40 - 10}vh`,
       }}
     >
-      <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden">
+      <div
+        ref={stickyRef}
+        className="sticky top-0 h-screen overflow-hidden"
+      >
         {/* background images */}
         <div
           className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
@@ -157,16 +168,16 @@ export default function ServicesSection() {
         {/* ===== MOBILE — FIXED ===== */}
         {isMobile && (
           <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
-            <div className="flex flex-col gap-5 opacity-90 mb-12">
+            <div className="flex flex-col gap-6 opacity-90 mb-14">
               {services.map((s, i) => (
                 <div key={s.title}>
                   <div
                     onClick={() => {
                       setActive(i);
-                      mobileProgressRef.current = i * 0.9;
+                      mobileProgressRef.current = i;
                     }}
                     className={`
-                      uppercase text-[26px] leading-[1.1] font-bold
+                      uppercase text-[26px] leading-[1.15] font-bold
                       transition-colors duration-300
                       ${i === active ? "text-[#DBFE02]" : "text-white/30"}
                     `}
@@ -184,7 +195,6 @@ export default function ServicesSection() {
             </div>
           </div>
         )}
-
       </div>
     </section>
   );
