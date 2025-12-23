@@ -8,7 +8,7 @@ type Slide = {
 };
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
-  // --- бесконечная лента ---
+  // --- infinite track ---
   const base = images;
   const repeats = 30;
   const extended = Array.from({ length: repeats }, () => base).flat();
@@ -21,7 +21,16 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const isDesktop =
     typeof window !== "undefined" && window.innerWidth >= 768;
 
-  // --- центрирование активного ---
+  // =========================
+  // SWIPE STATE (mobile)
+  // =========================
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+  const SWIPE_THRESHOLD = 50;
+
+  // =========================
+  // CENTER ACTIVE SLIDE
+  // =========================
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -40,7 +49,9 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     track.style.transform = `translateX(-${offset}px)`;
   }, [index]);
 
-  // --- loop ---
+  // =========================
+  // LOOP CORRECTION
+  // =========================
   useEffect(() => {
     const len = extended.length;
     const segment = base.length;
@@ -62,13 +73,44 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     }
   }, [index, extended.length, base.length, middleIndex]);
 
+  // =========================
+  // CONTROLS
+  // =========================
   const next = () => setIndex((i) => i + 1);
   const prev = () => setIndex((i) => i - 1);
 
+  // =========================
+  // TOUCH HANDLERS
+  // =========================
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEndX(null);
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.touches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (touchStartX === null || touchEndX === null) return;
+
+    const delta = touchStartX - touchEndX;
+
+    if (delta > SWIPE_THRESHOLD) next(); // swipe left
+    if (delta < -SWIPE_THRESHOLD) prev(); // swipe right
+
+    setTouchStartX(null);
+    setTouchEndX(null);
+  };
+
+  // =========================
+  // RENDER
+  // =========================
   return (
     <section className="w-full bg-black py-16" id="gallery">
       <div className="mx-auto w-full px-4 md:px-8">
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="mb-8 flex justify-between items-center">
           <h2 className="text-white font-anybody text-xl tracking-[0.25em] uppercase" />
           <div className="flex gap-3">
@@ -87,8 +129,13 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
           </div>
         </div>
 
-        {/* Viewport */}
-        <div className="relative overflow-hidden w-full h-[560px]">
+        {/* VIEWPORT (SWIPE HERE) */}
+        <div
+          className="relative overflow-hidden w-full h-[560px]"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <div
             ref={trackRef}
             className="absolute left-0 bottom-0 flex gap-10 will-change-transform"
@@ -114,7 +161,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
-                    className="object-cover rounded mx-auto"
+                    className="object-cover rounded mx-auto select-none pointer-events-none"
+                    draggable={false}
                     style={{
                       height:
                         isActive && isDesktop
