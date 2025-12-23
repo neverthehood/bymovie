@@ -8,7 +8,6 @@ type Slide = {
 };
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
-  // --- infinite track ---
   const base = images;
   const repeats = 30;
   const extended = Array.from({ length: repeats }, () => base).flat();
@@ -22,14 +21,14 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     typeof window !== "undefined" && window.innerWidth >= 768;
 
   // =========================
-  // SWIPE STATE (mobile)
+  // SWIPE STATE
   // =========================
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchEndX, setTouchEndX] = useState<number | null>(null);
   const SWIPE_THRESHOLD = 50;
 
   // =========================
-  // CENTER ACTIVE SLIDE
+  // CENTER ACTIVE
   // =========================
   useEffect(() => {
     const track = trackRef.current;
@@ -50,21 +49,13 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   }, [index]);
 
   // =========================
-  // LOOP CORRECTION
+  // LOOP FIX
   // =========================
   useEffect(() => {
     const len = extended.length;
     const segment = base.length;
 
-    if (index > len - segment * 5) {
-      requestAnimationFrame(() => {
-        if (!trackRef.current) return;
-        trackRef.current.style.transition = "none";
-        setIndex(middleIndex);
-      });
-    }
-
-    if (index < segment * 5) {
+    if (index > len - segment * 5 || index < segment * 5) {
       requestAnimationFrame(() => {
         if (!trackRef.current) return;
         trackRef.current.style.transition = "none";
@@ -80,7 +71,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const prev = () => setIndex((i) => i - 1);
 
   // =========================
-  // TOUCH HANDLERS
+  // TOUCH
   // =========================
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEndX(null);
@@ -93,11 +84,10 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
   const onTouchEnd = () => {
     if (touchStartX === null || touchEndX === null) return;
-
     const delta = touchStartX - touchEndX;
 
-    if (delta > SWIPE_THRESHOLD) next(); // swipe left
-    if (delta < -SWIPE_THRESHOLD) prev(); // swipe right
+    if (delta > SWIPE_THRESHOLD) next();
+    if (delta < -SWIPE_THRESHOLD) prev();
 
     setTouchStartX(null);
     setTouchEndX(null);
@@ -107,29 +97,16 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // RENDER
   // =========================
   return (
-    <section className="w-full bg-black py-16" id="gallery">
+    <section className="w-full bg-black py-16">
       <div className="mx-auto w-full px-4 md:px-8">
 
-        {/* HEADER */}
-        <div className="mb-8 flex justify-between items-center">
-          <h2 className="text-white font-anybody text-xl tracking-[0.25em] uppercase" />
-          <div className="flex gap-3">
-            <button
-              onClick={prev}
-              className="h-9 w-9 rounded-full border border-white/40 text-white flex items-center justify-center hover:bg-white hover:text-black transition"
-            >
-              ‹
-            </button>
-            <button
-              onClick={next}
-              className="h-9 w-9 rounded-full border border-white/40 text-white flex items-center justify-center hover:bg-white hover:text-black transition"
-            >
-              ›
-            </button>
-          </div>
+        {/* CONTROLS */}
+        <div className="mb-8 flex justify-end gap-3">
+          <button onClick={prev} className="h-9 w-9 border border-white/40 text-white rounded-full">‹</button>
+          <button onClick={next} className="h-9 w-9 border border-white/40 text-white rounded-full">›</button>
         </div>
 
-        {/* VIEWPORT (SWIPE HERE) */}
+        {/* VIEWPORT */}
         <div
           className="relative overflow-hidden w-full h-[560px]"
           onTouchStart={onTouchStart}
@@ -138,42 +115,44 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
         >
           <div
             ref={trackRef}
-            className="absolute left-0 bottom-0 flex gap-10 will-change-transform"
+            className="absolute left-0 bottom-0 flex gap-8 will-change-transform"
           >
             {extended.map((img, i) => {
               const isActive = i === index;
+
+              const width = isDesktop
+                ? isActive ? 420 : 240
+                : isActive ? 300 : 220;
+
+              const height = isDesktop
+                ? isActive ? 560 : 360
+                : isActive ? 440 : 320;
+
+              const scale = isActive ? 1.08 : 1;
 
               return (
                 <div
                   key={i}
                   onClick={() => setIndex(i)}
-                  className={`
-                    cursor-pointer flex items-center h-[560px]
-                    ${isActive ? "z-10" : "opacity-35"}
-                  `}
+                  className={`flex items-center justify-center cursor-pointer ${
+                    isActive ? "z-10" : "opacity-40"
+                  }`}
                   style={{
-                    width:
-                      isActive && isDesktop ? "420px" : "240px",
-                    transition:
-                      "all 1s cubic-bezier(0.16,1,0.3,1)",
+                    width,
+                    height: 560,
+                    transition: "all 0.8s cubic-bezier(0.16,1,0.3,1)",
                   }}
                 >
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
-                    className="object-cover rounded mx-auto select-none pointer-events-none"
                     draggable={false}
+                    className="rounded object-cover select-none pointer-events-none"
                     style={{
-                      height:
-                        isActive && isDesktop
-                          ? "560px"
-                          : "360px",
-                      transform:
-                        isActive && isDesktop
-                          ? "scale(1.12)"
-                          : "scale(1)",
-                      transition:
-                        "all 1s cubic-bezier(0.16,1,0.3,1)",
+                      width,
+                      height,
+                      transform: `scale(${scale})`,
+                      transition: "all 0.8s cubic-bezier(0.16,1,0.3,1)",
                     }}
                   />
                 </div>
