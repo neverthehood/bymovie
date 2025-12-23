@@ -37,7 +37,7 @@ export default function ServicesSection() {
 
       // скорость прокрутки
       // mobile — медленно, desktop — быстрее
-      const speed = isMobile ? 2.1 : 2.5;
+      const speed = isMobile ? 1.2 : 2.5;
 
       const progress = (scrollY - sectionTop) / (vh * speed);
 
@@ -149,7 +149,7 @@ export default function ServicesSection() {
                       window.scrollTo({
                         top:
                           sectionRef.current!.offsetTop +
-                          i * window.innerHeight * 1.2,
+                          i * window.innerHeight * 0.8,
                         behavior: "smooth",
                       })
                     }
