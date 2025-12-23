@@ -46,7 +46,7 @@ export default function ServicesSection() {
         // ==========================
         // MOBILE FIX
         // ==========================
-        const SMOOTHING = 0.08; // чем меньше — тем спокойнее
+        const SMOOTHING = 0.06; // чем меньше — тем спокойнее
         mobileProgressRef.current +=
           (rawProgress - mobileProgressRef.current) * SMOOTHING;
 
@@ -154,21 +154,17 @@ export default function ServicesSection() {
           </>
         )}
 
-        {/* ===== MOBILE — ИСПРАВЛЕНО ===== */}
+        {/* ===== MOBILE — FIXED ===== */}
         {isMobile && (
           <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
             <div className="flex flex-col gap-5 opacity-90 mb-12">
               {services.map((s, i) => (
                 <div key={s.title}>
                   <div
-                    onClick={() =>
-                      window.scrollTo({
-                        top:
-                          sectionRef.current!.offsetTop +
-                          i * window.innerHeight,
-                        behavior: "smooth",
-                      })
-                    }
+                    onClick={() => {
+                      setActive(i);
+                      mobileProgressRef.current = i * 0.9;
+                    }}
                     className={`
                       uppercase text-[26px] leading-[1.1] font-bold
                       transition-colors duration-300
@@ -188,6 +184,7 @@ export default function ServicesSection() {
             </div>
           </div>
         )}
+
       </div>
     </section>
   );
