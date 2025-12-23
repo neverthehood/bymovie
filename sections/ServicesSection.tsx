@@ -149,7 +149,7 @@ export default function ServicesSection() {
                       window.scrollTo({
                         top:
                           sectionRef.current!.offsetTop +
-                          i * window.innerHeight * 1.2,
+                          i * window.innerHeight * 1,
                         behavior: "smooth",
                       })
                     }
