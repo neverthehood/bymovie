@@ -2,24 +2,24 @@
 
 export default function LedWallSection() {
   return (
-    <section className="w-full py-20 px-6 md:px-20 bg-black text-white">
+    <section className="w-full py-20 px-0 md:px-20 bg-black text-white">
       <div className="mx-auto">
 
         {/* IMAGE */}
-        <div className="max-w-[1600px] mx-auto">
+        <div className="w-full md:max-w-[1600px] md:mx-auto">
           <Image
             src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/BMVP_Screen-_2_.webp"
             alt="LED Wall"
             width={1600}
             height={900}
-            className="w-full h-auto rounded-lg"
+            className="w-full h-auto md:rounded-lg"
             priority
             unoptimized
           />
         </div>
 
         {/* TEXT */}
-        <div className="max-w-[1200px] mx-auto">
+        <div className="max-w-[1200px] mx-auto px-6 md:px-0">
           <p className="mt-10 text-lg leading-relaxed text-white/80">
             VP using LED-wall is a trending technological approach to solving artistic tasks
             in the preparation and production of video content. The essence of the
