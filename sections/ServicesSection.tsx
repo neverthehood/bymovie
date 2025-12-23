@@ -50,7 +50,7 @@ export default function ServicesSection() {
         const targetProgress =
           normalized * services.length;
 
-        const SMOOTHING = 0.04; // спокойствие
+        const SMOOTHING = 0.058; // спокойствие
         mobileProgressRef.current +=
           (targetProgress - mobileProgressRef.current) * SMOOTHING;
 
@@ -110,7 +110,7 @@ export default function ServicesSection() {
       className="relative w-full bg-black text-white"
       style={{
         height: isMobile
-          ? `${services.length * 70 + 40}vh`
+          ? `${services.length * 62 + 30}vh`
           : `${services.length * 40 - 10}vh`,
       }}
     >
