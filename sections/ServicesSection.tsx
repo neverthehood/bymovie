@@ -9,7 +9,7 @@ export default function ServicesSection() {
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const subtitleRef = useRef<HTMLDivElement | null>(null);
 
-  // titleRefs хранит DOM-узлы для desktop списка заголовков
+  // refs для desktop-заголовков
   const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [active, setActive] = useState(0);
@@ -24,7 +24,7 @@ export default function ServicesSection() {
   }, []);
 
   //
-  // MAIN SCROLL EVENT — the core logic
+  // MAIN SCROLL LOGIC
   //
   useEffect(() => {
     const handler = () => {
@@ -35,24 +35,14 @@ export default function ServicesSection() {
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
 
-      // how far we scrolled *inside* the long section
-      const progress = (scrollY - sectionTop) / vh*4;
+      // скорость прокрутки
+      // mobile — медленно, desktop — быстрее
+      const speed = isMobile ? 1.2 : 2.5;
 
-      // snap to integer safely
-      let idx;
+      const progress = (scrollY - sectionTop) / (vh * speed);
 
-      // мобильная версия — менее чувствительное переключение
-      if (isMobile) {
-        const zone = 0.7; // ← нужно прокрутить 80% экрана для смены пункта
-        idx = Math.floor(progress / zone);
-      } else {
-        const zone = 0.4; // 60% экрана требуется прокрутить
-        idx = Math.floor(progress);
-      }
-
-
+      let idx = Math.floor(progress);
       idx = Math.max(0, Math.min(services.length - 1, idx));
-
 
       if (idx !== active) {
         setActive(idx);
@@ -61,10 +51,10 @@ export default function ServicesSection() {
 
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
-  }, [active]);
+  }, [active, isMobile]);
 
   //
-  // DESKTOP — move subtitle vertically to be aligned with active title
+  // DESKTOP — align subtitle with active title
   //
   useEffect(() => {
     if (isMobile) return;
@@ -81,7 +71,7 @@ export default function ServicesSection() {
     const centerY = tRect.top + tRect.height / 2 - sRect.top;
 
     gsap.to(subtitle, {
-      y: centerY -30,
+      y: centerY - 30,
       duration: 0.4,
       ease: "power2.out",
     });
@@ -93,13 +83,14 @@ export default function ServicesSection() {
       ref={sectionRef}
       className="relative w-full bg-black text-white"
       style={{
-        height: `${services.length * 40 - 10}vh`, // VERY IMPORTANT
+        height: isMobile
+          ? `${services.length * 120}vh`
+          : `${services.length * 60}vh`,
       }}
     >
-      {/* sticky viewport (always 100vh) */}
+      {/* sticky viewport */}
       <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden">
-        {/* ---- background videos ---- */}
-        {/* ---- background IMAGES ---- */}
+        {/* background images */}
         <div
           className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
           style={{ transform: `translateY(-${active * 100}%)` }}
@@ -107,25 +98,24 @@ export default function ServicesSection() {
           {services.map((s, i) => (
             <img
               key={i}
-              src={s.img}          // IMPORTANT: new field
+              src={s.img}
               alt={s.title}
               className="h-screen w-full object-cover flex-shrink-0"
             />
           ))}
         </div>
 
-
+        {/* overlay */}
         <div className="absolute inset-0 bg-black/45" />
 
-        {/* ---- desktop ---- */}
+        {/* ---- DESKTOP ---- */}
         {!isMobile && (
           <>
             <div className="absolute bottom-12 left-12 z-20 flex flex-col gap-4">
               {services.map((s, i) => (
                 <div
                   key={s.title}
-                  // Блоковый ref-callback, явно типизированный, возвращает void
-                  ref={(el: HTMLDivElement | null) => {
+                  ref={(el) => {
                     titleRefs.current[i] = el;
                   }}
                   onClick={() => setActive(i)}
@@ -148,29 +138,29 @@ export default function ServicesSection() {
           </>
         )}
 
-        {/* ---- mobile ---- */}
+        {/* ---- MOBILE ---- */}
         {isMobile && (
           <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
             <div className="flex flex-col gap-4 opacity-90 mb-10">
               {services.map((s, i) => (
                 <div key={s.title}>
-                  {/* Заголовок */}
                   <div
                     onClick={() =>
                       window.scrollTo({
-                        top: sectionRef.current!.offsetTop + i * window.innerHeight,
+                        top:
+                          sectionRef.current!.offsetTop +
+                          i * window.innerHeight * 1.2,
                         behavior: "smooth",
                       })
                     }
                     className={`
-                      uppercase text-[26px] leading-[1] font-bold transition-all 
+                      uppercase text-[26px] leading-[1] font-bold transition-all
                       ${i === active ? "text-[#DBFE02]" : "text-white/30"}
                     `}
                   >
                     {s.title}
                   </div>
 
-                  {/* Подзаголовок под активным пунктом */}
                   {i === active && (
                     <div className="text-white/90 text-[18px] mt-1 whitespace-pre-line">
                       {s.subtitle}
@@ -181,7 +171,6 @@ export default function ServicesSection() {
             </div>
           </div>
         )}
-
       </div>
     </section>
   );
