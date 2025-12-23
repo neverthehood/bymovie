@@ -8,14 +8,16 @@ export default function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const subtitleRef = useRef<HTMLDivElement | null>(null);
+
   const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  // =========================
+  // MOBILE FIX: сглаженное значение прогресса
+  const mobileProgressRef = useRef(0);
+
   // Detect mobile
-  // =========================
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -23,9 +25,9 @@ export default function ServicesSection() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // =========================
-  // SCROLL HANDLER
-  // =========================
+  //
+  // MAIN SCROLL EVENT
+  //
   useEffect(() => {
     const handler = () => {
       const sec = sectionRef.current;
@@ -35,47 +37,45 @@ export default function ServicesSection() {
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
 
+      // общий прогресс секции
+      const rawProgress = (scrollY - sectionTop) / vh * 4;
+
+      let idx = active;
+
       if (isMobile) {
-        const sectionHeight = sec.offsetHeight - vh;
+        // ==========================
+        // MOBILE FIX
+        // ==========================
+        const SMOOTHING = 0.08; // чем меньше — тем спокойнее
+        mobileProgressRef.current +=
+          (rawProgress - mobileProgressRef.current) * SMOOTHING;
 
-        if (sectionHeight <= 0) return;
+        const zone = 0.9; // нужно почти целый экран для смены
+        idx = Math.floor(mobileProgressRef.current / zone);
 
-        const progress =
-          (scrollY - sectionTop) / sectionHeight;
-
-        const clamped = Math.max(0, Math.min(1, progress));
-
-        const idx = Math.round(
-          clamped * (services.length - 1)
-        );
-
-        if (idx !== active) {
-          setActive(idx);
+        // удерживаем последний пункт дольше
+        if (idx >= services.length - 1) {
+          idx = services.length - 1;
         }
       } else {
-        // === DESKTOP как было ===
-        const progress = (scrollY - sectionTop) / vh;
-        const idx = Math.floor(progress);
+        // DESKTOP — НЕ ТРОГАЕМ
+        idx = Math.floor(rawProgress);
+      }
 
-        const clamped = Math.max(
-          0,
-          Math.min(services.length - 1, idx)
-        );
+      idx = Math.max(0, Math.min(services.length - 1, idx));
 
-        if (clamped !== active) {
-          setActive(clamped);
-        }
+      if (idx !== active) {
+        setActive(idx);
       }
     };
 
-    window.addEventListener("scroll", handler, { passive: true });
+    window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, [active, isMobile]);
 
-
-  // =========================
-  // DESKTOP subtitle follow
-  // =========================
+  //
+  // DESKTOP subtitle animation — НЕ ТРОГАЕМ
+  //
   useEffect(() => {
     if (isMobile) return;
 
@@ -97,9 +97,6 @@ export default function ServicesSection() {
     });
   }, [active, isMobile]);
 
-  // =========================
-  // RENDER
-  // =========================
   return (
     <section
       id="services"
@@ -110,8 +107,7 @@ export default function ServicesSection() {
       }}
     >
       <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden">
-
-        {/* BACKGROUND IMAGES */}
+        {/* background images */}
         <div
           className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
           style={{ transform: `translateY(-${active * 100}%)` }}
@@ -128,7 +124,7 @@ export default function ServicesSection() {
 
         <div className="absolute inset-0 bg-black/45" />
 
-        {/* ================= DESKTOP ================= */}
+        {/* ===== DESKTOP — НЕ ТРОГАЕМ ===== */}
         {!isMobile && (
           <>
             <div className="absolute bottom-12 left-12 z-20 flex flex-col gap-4">
@@ -158,44 +154,40 @@ export default function ServicesSection() {
           </>
         )}
 
-        {/* ================= MOBILE ================= */}
+        {/* ===== MOBILE — ИСПРАВЛЕНО ===== */}
         {isMobile && (
           <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
-            <div className="flex flex-col gap-6 mb-12">
-              {services.map((s, i) => {
-                const isActive = i === active;
-
-                return (
-                  <div key={s.title}>
-                    <div
-                      onClick={() => {
-                        const top =
+            <div className="flex flex-col gap-5 opacity-90 mb-12">
+              {services.map((s, i) => (
+                <div key={s.title}>
+                  <div
+                    onClick={() =>
+                      window.scrollTo({
+                        top:
                           sectionRef.current!.offsetTop +
-                          i * window.innerHeight;
-                        window.scrollTo({ top, behavior: "smooth" });
-                      }}
-                      className={`
-                        uppercase font-bold leading-tight transition-all
-                        ${isActive
-                          ? "text-[#DBFE02] text-[28px]"
-                          : "text-white/30 text-[22px]"}
-                      `}
-                    >
-                      {s.title}
-                    </div>
-
-                    {isActive && (
-                      <div className="text-white/90 text-[17px] mt-2 whitespace-pre-line">
-                        {s.subtitle}
-                      </div>
-                    )}
+                          i * window.innerHeight,
+                        behavior: "smooth",
+                      })
+                    }
+                    className={`
+                      uppercase text-[26px] leading-[1.1] font-bold
+                      transition-colors duration-300
+                      ${i === active ? "text-[#DBFE02]" : "text-white/30"}
+                    `}
+                  >
+                    {s.title}
                   </div>
-                );
-              })}
+
+                  {i === active && (
+                    <div className="text-white/90 text-[18px] mt-2 whitespace-pre-line">
+                      {s.subtitle}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
-
       </div>
     </section>
   );
