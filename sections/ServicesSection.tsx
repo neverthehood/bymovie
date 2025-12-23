@@ -46,11 +46,11 @@ export default function ServicesSection() {
         // ==========================
         // MOBILE FIX
         // ==========================
-        const SMOOTHING = 0.06; // чем меньше — тем спокойнее
+        const SMOOTHING = 0.035; // чем меньше — тем спокойнее
         mobileProgressRef.current +=
           (rawProgress - mobileProgressRef.current) * SMOOTHING;
 
-        const zone = 0.9; // нужно почти целый экран для смены
+        const zone = 1.25; // нужно почти целый экран для смены
         idx = Math.floor(mobileProgressRef.current / zone);
 
         // удерживаем последний пункт дольше
