@@ -9,13 +9,12 @@ export default function ServicesSection() {
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const subtitleRef = useRef<HTMLDivElement | null>(null);
 
-  // refs для desktop-заголовков
   const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile
+  // detect mobile
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -24,9 +23,11 @@ export default function ServicesSection() {
   }, []);
 
   //
-  // MAIN SCROLL LOGIC
+  // DESKTOP scroll logic ONLY
   //
   useEffect(() => {
+    if (isMobile) return;
+
     const handler = () => {
       const sec = sectionRef.current;
       if (!sec) return;
@@ -35,18 +36,12 @@ export default function ServicesSection() {
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
 
-      // скорость прокрутки
-      // mobile — медленно, desktop — быстрее
-      const speed = isMobile ? 1.2 : 2.5;
-
-      const progress = (scrollY - sectionTop) / (vh * speed);
+      const progress = (scrollY - sectionTop) / (vh * 2.5);
 
       let idx = Math.floor(progress);
       idx = Math.max(0, Math.min(services.length - 1, idx));
 
-      if (idx !== active) {
-        setActive(idx);
-      }
+      if (idx !== active) setActive(idx);
     };
 
     window.addEventListener("scroll", handler);
@@ -54,7 +49,7 @@ export default function ServicesSection() {
   }, [active, isMobile]);
 
   //
-  // DESKTOP — align subtitle with active title
+  // DESKTOP subtitle alignment
   //
   useEffect(() => {
     if (isMobile) return;
@@ -83,16 +78,14 @@ export default function ServicesSection() {
       ref={sectionRef}
       className="relative w-full bg-black text-white"
       style={{
-        height: isMobile
-          ? `${services.length * 120}vh`
-          : `${services.length * 60}vh`,
+        height: isMobile ? "100vh" : `${services.length * 60}vh`,
       }}
     >
-      {/* sticky viewport */}
+      {/* STICKY VIEWPORT */}
       <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden">
-        {/* background images */}
+        {/* BACKGROUND IMAGES */}
         <div
-          className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
+          className="absolute inset-0 transition-transform duration-700 ease-in-out"
           style={{ transform: `translateY(-${active * 100}%)` }}
         >
           {services.map((s, i) => (
@@ -100,24 +93,22 @@ export default function ServicesSection() {
               key={i}
               src={s.img}
               alt={s.title}
-              className="h-screen w-full object-cover flex-shrink-0"
+              className="h-screen w-full object-cover"
             />
           ))}
         </div>
 
-        {/* overlay */}
+        {/* OVERLAY */}
         <div className="absolute inset-0 bg-black/45" />
 
-        {/* ---- DESKTOP ---- */}
+        {/* ================= DESKTOP ================= */}
         {!isMobile && (
           <>
             <div className="absolute bottom-12 left-12 z-20 flex flex-col gap-4">
               {services.map((s, i) => (
                 <div
                   key={s.title}
-                  ref={(el) => {
-                    titleRefs.current[i] = el;
-                  }}
+                  ref={(el) => (titleRefs.current[i] = el)}
                   onClick={() => setActive(i)}
                   className={`
                     uppercase text-4xl font-bold cursor-pointer transition-all
@@ -138,31 +129,25 @@ export default function ServicesSection() {
           </>
         )}
 
-        {/* ---- MOBILE ---- */}
+        {/* ================= MOBILE ================= */}
         {isMobile && (
-          <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
-            <div className="flex flex-col gap-4 opacity-90 mb-10">
+          <div className="absolute inset-0 z-20 flex flex-col justify-end p-6">
+            <div className="flex flex-col gap-3 mb-10">
               {services.map((s, i) => (
                 <div key={s.title}>
                   <div
-                    onClick={() =>
-                      window.scrollTo({
-                        top:
-                          sectionRef.current!.offsetTop +
-                          i * window.innerHeight * 0.8,
-                        behavior: "smooth",
-                      })
-                    }
+                    onClick={() => setActive(i)}
                     className={`
-                      uppercase text-[26px] leading-[1] font-bold transition-all
-                      ${i === active ? "text-[#DBFE02]" : "text-white/30"}
+                      uppercase text-[24px] font-bold leading-tight
+                      transition-colors
+                      ${i === active ? "text-[#DBFE02]" : "text-white/40"}
                     `}
                   >
                     {s.title}
                   </div>
 
                   {i === active && (
-                    <div className="text-white/90 text-[18px] mt-1 whitespace-pre-line">
+                    <div className="mt-2 text-[16px] leading-snug text-white/90 whitespace-pre-line">
                       {s.subtitle}
                     </div>
                   )}
