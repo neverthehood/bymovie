@@ -8,13 +8,14 @@ export default function ServicesSection() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const subtitleRef = useRef<HTMLDivElement | null>(null);
-
   const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  // detect mobile
+  // =========================
+  // Detect mobile
+  // =========================
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -22,12 +23,10 @@ export default function ServicesSection() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  //
-  // DESKTOP scroll logic ONLY
-  //
+  // =========================
+  // SCROLL HANDLER
+  // =========================
   useEffect(() => {
-    if (isMobile) return;
-
     const handler = () => {
       const sec = sectionRef.current;
       if (!sec) return;
@@ -36,21 +35,34 @@ export default function ServicesSection() {
       const scrollY = window.scrollY;
       const vh = window.innerHeight;
 
-      const progress = (scrollY - sectionTop) / (vh * 2.5);
+      // нормализованный прогресс
+      const rawProgress = (scrollY - sectionTop) / vh;
 
-      let idx = Math.floor(progress);
+      let idx = active;
+
+      if (isMobile) {
+        // 🔥 MOBILE — более стабильная логика
+        const step = 0.9; // нужно почти 1 экран
+        idx = Math.round(rawProgress / step);
+      } else {
+        // DESKTOP — как было
+        idx = Math.floor(rawProgress);
+      }
+
       idx = Math.max(0, Math.min(services.length - 1, idx));
 
-      if (idx !== active) setActive(idx);
+      if (idx !== active) {
+        setActive(idx);
+      }
     };
 
-    window.addEventListener("scroll", handler);
+    window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, [active, isMobile]);
 
-  //
-  // DESKTOP subtitle alignment
-  //
+  // =========================
+  // DESKTOP subtitle follow
+  // =========================
   useEffect(() => {
     if (isMobile) return;
 
@@ -72,20 +84,23 @@ export default function ServicesSection() {
     });
   }, [active, isMobile]);
 
+  // =========================
+  // RENDER
+  // =========================
   return (
     <section
       id="services"
       ref={sectionRef}
       className="relative w-full bg-black text-white"
       style={{
-        height: isMobile ? "100vh" : `${services.length * 60}vh`,
+        height: `${services.length * 40 - 10}vh`,
       }}
     >
-      {/* STICKY VIEWPORT */}
       <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden">
+
         {/* BACKGROUND IMAGES */}
         <div
-          className="absolute inset-0 transition-transform duration-700 ease-in-out"
+          className="absolute inset-0 flex flex-col transition-transform duration-700 ease-in-out"
           style={{ transform: `translateY(-${active * 100}%)` }}
         >
           {services.map((s, i) => (
@@ -93,12 +108,11 @@ export default function ServicesSection() {
               key={i}
               src={s.img}
               alt={s.title}
-              className="h-screen w-full object-cover"
+              className="h-screen w-full object-cover flex-shrink-0"
             />
           ))}
         </div>
 
-        {/* OVERLAY */}
         <div className="absolute inset-0 bg-black/45" />
 
         {/* ================= DESKTOP ================= */}
@@ -108,7 +122,9 @@ export default function ServicesSection() {
               {services.map((s, i) => (
                 <div
                   key={s.title}
-                  ref={(el) => (titleRefs.current[i] = el)}
+                  ref={(el) => {
+                    titleRefs.current[i] = el;
+                  }}
                   onClick={() => setActive(i)}
                   className={`
                     uppercase text-4xl font-bold cursor-pointer transition-all
@@ -131,31 +147,42 @@ export default function ServicesSection() {
 
         {/* ================= MOBILE ================= */}
         {isMobile && (
-          <div className="absolute inset-0 z-20 flex flex-col justify-end p-6">
-            <div className="flex flex-col gap-3 mb-10">
-              {services.map((s, i) => (
-                <div key={s.title}>
-                  <div
-                    onClick={() => setActive(i)}
-                    className={`
-                      uppercase text-[24px] font-bold leading-tight
-                      transition-colors
-                      ${i === active ? "text-[#DBFE02]" : "text-white/40"}
-                    `}
-                  >
-                    {s.title}
-                  </div>
+          <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
+            <div className="flex flex-col gap-6 mb-12">
+              {services.map((s, i) => {
+                const isActive = i === active;
 
-                  {i === active && (
-                    <div className="mt-2 text-[16px] leading-snug text-white/90 whitespace-pre-line">
-                      {s.subtitle}
+                return (
+                  <div key={s.title}>
+                    <div
+                      onClick={() => {
+                        const top =
+                          sectionRef.current!.offsetTop +
+                          i * window.innerHeight;
+                        window.scrollTo({ top, behavior: "smooth" });
+                      }}
+                      className={`
+                        uppercase font-bold leading-tight transition-all
+                        ${isActive
+                          ? "text-[#DBFE02] text-[28px]"
+                          : "text-white/30 text-[22px]"}
+                      `}
+                    >
+                      {s.title}
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {isActive && (
+                      <div className="text-white/90 text-[17px] mt-2 whitespace-pre-line">
+                        {s.subtitle}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
+
       </div>
     </section>
   );
