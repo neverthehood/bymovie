@@ -10,10 +10,10 @@ export default function Header() {
   return (
     <header
       className="
-      fixed top-0 left-0 w-full z-50 
-      px-6 py-5 flex justify-between items-center
-      bg-black/20 backdrop-blur-md
-    "
+        fixed top-0 left-0 w-full z-50 
+        px-6 py-5 flex justify-between items-center
+        bg-black/20 backdrop-blur-md
+      "
     >
       {/* LOGO */}
       <a href="/" className="flex items-center">
@@ -22,12 +22,14 @@ export default function Header() {
           alt="BYMOVIE Logo"
           width={160}
           height={50}
-          className="object-contain"
+          className="
+            object-contain
+            w-[120px] md:w-[160px]
+            h-auto
+          "
           priority
         />
       </a>
-
-
 
       {/* DESKTOP MENU */}
       <nav className="hidden md:flex gap-10 text-sm font-anybodyCondensed tracking-wider">

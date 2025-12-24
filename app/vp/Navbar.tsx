@@ -28,14 +28,14 @@ export default function NavbarVP() {
           </a>
         </div>
 
-        {/* CENTER LOGO */}
+        {/* CENTER LOGO — DESKTOP (unchanged) */}
         <a href="/" className="flex items-center justify-center">
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
             width={160}
             height={40}
-            className="object-contain"
+            className="object-contain w-[160px] h-auto"
             priority
           />
         </a>
@@ -57,9 +57,13 @@ export default function NavbarVP() {
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={120}
-            height={32}
-            className="object-contain"
+            width={160}
+            height={40}
+            className="
+              object-contain
+              w-[100px]
+              h-auto
+            "
           />
         </a>
 
@@ -84,14 +88,18 @@ export default function NavbarVP() {
             <FiX size={28} />
           </button>
 
-          {/* LOGO INSIDE MOBILE MENU */}
+          {/* LOGO INSIDE MOBILE MENU — smaller */}
           <a href="/" onClick={() => setOpen(false)} className="mb-8">
             <Image
               src="/images/logo.png"
               alt="BYMOVIE Logo"
               width={160}
               height={40}
-              className="object-contain"
+              className="
+                object-contain
+                w-[120px]
+                h-auto
+              "
             />
           </a>
 

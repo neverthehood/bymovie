@@ -14,30 +14,56 @@ export default function HeroVP() {
     gsap.set(bottomMask.current, { yPercent: -30 });
 
     gsap.timeline()
-      .to(topMask.current, {
-        yPercent: -50,
-        duration: 1.4,
-        ease: "power3.inOut",
-      }, 0)
-      .to(bottomMask.current, {
-        yPercent: 50,
-        duration: 1.4,
-        ease: "power3.inOut",
-      }, 0);
-
+      .to(
+        topMask.current,
+        {
+          yPercent: -50,
+          duration: 1.4,
+          ease: "power3.inOut",
+        },
+        0
+      )
+      .to(
+        bottomMask.current,
+        {
+          yPercent: 50,
+          duration: 1.4,
+          ease: "power3.inOut",
+        },
+        0
+      );
   }, []);
 
   return (
     <section className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Background video */}
+      {/* ===== DESKTOP VIDEO ===== */}
       <video
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover hidden md:block"
         autoPlay
         loop
         muted
         playsInline
+        preload="metadata"
       >
-        <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/showreel-2.webm" type="video/webm" />
+        <source
+          src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Show_fin.webm"
+          type="video/webm"
+        />
+      </video>
+
+      {/* ===== MOBILE VIDEO ===== */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover block md:hidden"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+      >
+        <source
+          src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Show_fin_mobile.webm"
+          type="video/webm"
+        />
       </video>
 
       {/* Overlay */}
@@ -45,12 +71,16 @@ export default function HeroVP() {
 
       {/* Title */}
       <div className="relative z-20 flex h-full items-center justify-center">
-        <h1 className="
-          text-white text-center font-bold uppercase
-          text-5xl md:text-7xl leading-[1.05] tracking-tight
-        ">
-          Virtual<br />
-          Production<br />
+        <h1
+          className="
+            text-white text-center font-bold uppercase
+            text-5xl md:text-7xl leading-[1.05] tracking-tight
+          "
+        >
+          Virtual
+          <br />
+          Production
+          <br />
           LED Wall
         </h1>
       </div>
