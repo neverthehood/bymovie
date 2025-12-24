@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/sections/Hero";
 import Loader from "@/components/Loader";
@@ -8,13 +11,16 @@ import ProjectsSection from "@/sections/ProjectsSection";
 import Footer from "@/sections/Footer";
 
 export default function Page() {
+  const [heroReady, setHeroReady] = useState(false);
+
   return (
     <main className="relative w-full bg-black text-white">
       <Navbar />
 
-      <Loader />
+      {!heroReady && <Loader />}
 
-      <Hero />
+      <Hero onReady={() => setHeroReady(true)} />
+
       <WeAre />
       <ServicesSection />
       <HowWeWork />

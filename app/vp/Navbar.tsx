@@ -93,8 +93,8 @@ export default function NavbarVP() {
             <Image
               src="/images/logo.png"
               alt="BYMOVIE Logo"
-              width={160}
-              height={40}
+              width={105}
+              height={28}
               className="
                 object-contain
                 w-[120px]
