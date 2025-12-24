@@ -177,14 +177,13 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                   snap-center shrink-0
                   flex items-center justify-center
                   cursor-pointer
-                  bg-black   // ⬅️ ВОТ ЭТО
+                  bg-black
                 "
                 style={{
                   width: snapW,
                   height: snapH,
                 }}
               >
-
                 {/* INNER BOX — МЕНЯЕТ РАЗМЕР */}
                 <div
                   className="
@@ -197,7 +196,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                     height: innerH,
                   }}
                 >
-                  {/* IMAGE — ABSOLUTE (FIX WHITE LINE) */}
+                  {/* IMAGE — ABSOLUTE */}
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
@@ -209,10 +208,16 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                       select-none pointer-events-none
                     "
                   />
+
+                  {/* BOTTOM OVERLAY — KILLS HAIRLINE */}
+                  <div
+                    className="absolute left-0 bottom-0 w-full h-[2px] bg-black pointer-events-none"
+                  />
                 </div>
               </div>
             );
           })}
+
         </div>
       </div>
     </section>
