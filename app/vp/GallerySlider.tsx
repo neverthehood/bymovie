@@ -199,10 +199,14 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                     alt={img.alt ?? ""}
                     draggable={false}
                     className="
-                      w-full h-full object-cover
+                      block
+                      w-full
+                      min-h-[101%]
+                      object-cover
                       select-none pointer-events-none
                     "
                   />
+
                 </div>
               </div>
             );
