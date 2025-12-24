@@ -57,8 +57,8 @@ export default function Navbar() {
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={160}
-            height={40}
+            width={105}
+            height={28}
             className="h-[28px] w-auto object-contain"
             priority
           />
