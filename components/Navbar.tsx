@@ -9,7 +9,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* DESKTOP NAV — НЕ ТРОГАЕМ */}
+      {/* ================= DESKTOP NAV — НЕ ТРОГАЕМ ================= */}
       <nav
         className="
           fixed -top-5 left-0 w-full z-[999] 
@@ -48,15 +48,15 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* MOBILE NAV TOP BAR — FIXED LOGO */}
+      {/* ================= MOBILE TOP BAR ================= */}
       <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-5 text-white">
         <a href="/" className="flex items-center">
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={105}
+            width={105}   // только для aspect-ratio
             height={28}
-            className="object-contain h-[28px] w-auto"
+            className="h-[28px] w-auto object-contain"
             priority
           />
         </a>
@@ -66,7 +66,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* MOBILE FULLSCREEN MENU */}
+      {/* ================= MOBILE FULLSCREEN MENU ================= */}
       {open && (
         <div
           className="
@@ -83,14 +83,14 @@ export default function Navbar() {
             <FiX size={28} />
           </button>
 
-          {/* LOGO INSIDE MOBILE MENU — FIXED */}
+          {/* LOGO INSIDE MOBILE MENU */}
           <a href="/" onClick={() => setOpen(false)} className="mb-8">
             <Image
               src="/images/logo.png"
               alt="BYMOVIE Logo"
               width={105}
               height={28}
-              className="object-contain h-[28px] w-auto"
+              className="h-[28px] w-auto object-contain"
             />
           </a>
 
