@@ -9,7 +9,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* DESKTOP NAV */}
+      {/* DESKTOP NAV — НЕ ТРОГАЕМ */}
       <nav
         className="
           fixed -top-5 left-0 w-full z-[999] 
@@ -28,14 +28,14 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* CENTER LOGO — заменён на картинку */}
+        {/* CENTER LOGO — DESKTOP */}
         <a href="/" className="flex items-center justify-center">
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
             width={160}
             height={40}
-            className="object-contain h-[28px] md:h-[40px]"
+            className="object-contain w-[160px] h-auto"
             priority
           />
         </a>
@@ -51,19 +51,20 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* MOBILE NAV TOP BAR */}
+      {/* MOBILE NAV TOP BAR — КАК В NavbarVP */}
       <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-5 text-white">
         <a href="/" className="flex items-center">
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={160}
+            width={160}      // для aspect-ratio
             height={40}
             className="
               object-contain
-              w-[100px]
+              w-[100px]      // ← РЕАЛЬНЫЙ размер на мобиле
               h-auto
             "
+            priority
           />
         </a>
 
@@ -71,7 +72,6 @@ export default function Navbar() {
           <FiMenu size={26} />
         </button>
       </div>
-
 
       {/* MOBILE FULLSCREEN MENU */}
       {open && (
@@ -83,9 +83,23 @@ export default function Navbar() {
             tracking-[0.2em]
           "
         >
-          <button className="absolute top-6 right-6" onClick={() => setOpen(false)}>
+          <button
+            className="absolute top-6 right-6"
+            onClick={() => setOpen(false)}
+          >
             <FiX size={28} />
           </button>
+
+          {/* LOGO INSIDE MOBILE MENU — тоже как в NavbarVP */}
+          <a href="/" onClick={() => setOpen(false)} className="mb-8">
+            <Image
+              src="/images/logo.png"
+              alt="BYMOVIE Logo"
+              width={160}
+              height={40}
+              className="object-contain w-[105px] h-auto"
+            />
+          </a>
 
           <a href="#weare" onClick={() => setOpen(false)}>We Are</a>
           <a href="#services" onClick={() => setOpen(false)}>Services</a>
