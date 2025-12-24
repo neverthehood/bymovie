@@ -4,31 +4,29 @@ import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import Image from "next/image";
 
-export default function NavbarVP() {
+export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* DESKTOP NAV */}
+      {/* DESKTOP NAV — НЕ ТРОГАЕМ */}
       <nav
         className="
-          fixed -top-4 left-0 w-full z-[999]
-          hidden md:flex items-center justify-between
-          px-16 py-8
+          fixed -top-5 left-0 w-full z-[999] 
+          hidden md:flex items-center justify-between 
+          px-16 py-8 
           text-white text-base tracking-[0.18em]
         "
       >
-        {/* LEFT */}
         <div className="flex gap-44">
-          <a href="/#weare" className="uppercase hover:text-[#D7F000] transition">
+          <a href="#weare" className="uppercase hover:text-[#D7F000] transition">
             We Are
           </a>
-          <a href="/#services" className="uppercase hover:text-[#D7F000] transition">
+          <a href="#services" className="uppercase hover:text-[#D7F000] transition">
             Services
           </a>
         </div>
 
-        {/* CENTER LOGO — DESKTOP (unchanged) */}
         <a href="/" className="flex items-center justify-center">
           <Image
             src="/images/logo.png"
@@ -40,30 +38,23 @@ export default function NavbarVP() {
           />
         </a>
 
-        {/* RIGHT */}
         <div className="flex gap-44">
-          <a href="/#projects" className="uppercase hover:text-[#D7F000] transition">
+          <a href="#projects" className="uppercase hover:text-[#D7F000] transition">
             Projects
           </a>
-          <a href="/#contacts" className="uppercase hover:text-[#D7F000] transition">
+          <a href="#contacts" className="uppercase hover:text-[#D7F000] transition">
             Contacts
           </a>
         </div>
       </nav>
 
-      {/* MOBILE NAV TOP BAR */}
+      {/* MOBILE NAV TOP BAR — INLINE SIZE (100% сработает) */}
       <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-5 text-white">
         <a href="/" className="flex items-center">
-          <Image
+          <img
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={160}
-            height={40}
-            className="
-              object-contain
-              w-[100px]
-              h-auto
-            "
+            style={{ height: 18, width: "auto", display: "block" }}
           />
         </a>
 
@@ -78,35 +69,27 @@ export default function NavbarVP() {
           className="
             fixed inset-0 bg-black z-[9999]
             flex flex-col items-center justify-center
-            text-white text-3xl gap-10 uppercase tracking-[0.2em]
+            text-white text-3xl gap-10 uppercase
+            tracking-[0.2em]
           "
         >
-          <button
-            className="absolute top-6 right-6"
-            onClick={() => setOpen(false)}
-          >
+          <button className="absolute top-6 right-6" onClick={() => setOpen(false)}>
             <FiX size={28} />
           </button>
 
-          {/* LOGO INSIDE MOBILE MENU — smaller */}
+          {/* LOGO INSIDE MOBILE MENU — INLINE SIZE */}
           <a href="/" onClick={() => setOpen(false)} className="mb-8">
-            <Image
+            <img
               src="/images/logo.png"
               alt="BYMOVIE Logo"
-              width={105}
-              height={28}
-              className="
-                object-contain
-                w-[105px]
-                h-auto
-              "
+              style={{ height: 24, width: "auto", display: "block" }}
             />
           </a>
 
-          <a href="/#weare" onClick={() => setOpen(false)}>We Are</a>
-          <a href="/#services" onClick={() => setOpen(false)}>Services</a>
-          <a href="/#projects" onClick={() => setOpen(false)}>Projects</a>
-          <a href="/#contacts" onClick={() => setOpen(false)}>Contacts</a>
+          <a href="#weare" onClick={() => setOpen(false)}>We Are</a>
+          <a href="#services" onClick={() => setOpen(false)}>Services</a>
+          <a href="#projects" onClick={() => setOpen(false)}>Projects</a>
+          <a href="#contacts" onClick={() => setOpen(false)}>Contacts</a>
         </div>
       )}
     </>
