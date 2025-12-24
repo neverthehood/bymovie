@@ -61,7 +61,7 @@ export default function Navbar() {
             alt="BYMOVIE Logo"
             width={105}
             height={28}
-            className="object-contain"
+            className="object-contain w-[105px] h-auto"
             priority
           />
         </a>
