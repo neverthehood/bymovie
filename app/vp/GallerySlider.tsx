@@ -186,7 +186,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                 {/* INNER BOX — РЕАЛЬНО МЕНЯЕТСЯ */}
                 <div
                   className="
-                    flex items-center justify-center
+                    flex items-center justify-center overflow-hidden
                     transition-[width,height] duration-300 ease-out
                   "
                   style={{
