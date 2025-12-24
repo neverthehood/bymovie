@@ -20,11 +20,11 @@ export default function Header() {
         <Image
           src="/images/logo.png"
           alt="BYMOVIE Logo"
-          width={160}
-          height={50}
+          width={160}   // intrinsic
+          height={40}
           className="
-            object-contain -top-4
-            w-[105px] md:w-[160px]
+            object-contain
+            w-[100px] md:w-[160px]
             h-auto
           "
           priority
