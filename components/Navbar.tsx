@@ -61,7 +61,7 @@ export default function Navbar() {
             height={28}
             className="
               object-contain
-              w-[85px]
+              w-[50px]
               h-auto
             "
             priority
