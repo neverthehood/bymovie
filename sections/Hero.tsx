@@ -140,7 +140,7 @@ export default function Hero() {
             playsInline
             className="absolute inset-0 h-full w-full object-cover"
           >
-            <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/showreel-2.webm" type="video/webm" />
+            <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Show_fin.webm" type="video/webm" />
           </video>
 
           <div className="absolute inset-0 bg-black/40" />
@@ -203,7 +203,7 @@ export default function Hero() {
             playsInline
             className="absolute inset-0 h-full w-full object-cover"
           >
-            <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/showreel-2.webm" type="video/webm" />
+            <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Show_fin.webm" type="video/webm" />
           </video>
 
           <div className="absolute inset-0 bg-black/35" />

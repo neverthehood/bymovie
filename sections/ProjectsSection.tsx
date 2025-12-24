@@ -61,7 +61,7 @@ const projects = [
   },
   {
     id: 9,
-    video: "https://vfq5uwwui8otjfkn.public.blob.vercel-storage.com/Black.webm",
+    video: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Black.webm",
     poster: "https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/sber.webp",
     title: "SBER/Mastercard",
     category: "TVC",
