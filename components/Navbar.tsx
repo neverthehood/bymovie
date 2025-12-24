@@ -59,7 +59,7 @@ export default function Navbar() {
             alt="BYMOVIE Logo"
             width={105}
             height={28}
-            className="h-[28px] w-auto object-contain"
+            className="h-[18px] w-auto object-contain"
             priority
           />
 
