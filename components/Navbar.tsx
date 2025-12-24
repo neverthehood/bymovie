@@ -52,7 +52,7 @@ export default function Navbar() {
       </nav>
 
       {/* MOBILE NAV TOP BAR */}
-      <div className="fixed -top-2 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-6 text-white">
+      <div className="fixed -top-4 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-6 text-white">
         
         {/* MOBILE LOGO — тоже картинка */}
         <a href="/" className="flex items-center">
