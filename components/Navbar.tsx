@@ -57,15 +57,12 @@ export default function Navbar() {
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={105}
-            height={28}
-            className="
-              object-contain
-              w-[50px]
-              h-auto
-            "
+            width={160}
+            height={40}
+            className="h-[28px] w-auto object-contain"
             priority
           />
+
         </a>
 
         <button onClick={() => setOpen(true)}>
