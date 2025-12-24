@@ -23,7 +23,7 @@ export default function Header() {
           width={160}
           height={50}
           className="
-            object-contain
+            object-contain -top-4
             w-[105px] md:w-[160px]
             h-auto
           "
