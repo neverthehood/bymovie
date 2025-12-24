@@ -8,7 +8,7 @@ type Slide = {
 };
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
-  const repeats = 7; // ⬅️ было 30
+  const repeats = 7;
   const extended = Array.from({ length: repeats }, () => images).flat();
   const middleIndex = Math.floor(extended.length / 2);
 
@@ -16,9 +16,10 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const [isDesktop, setIsDesktop] = useState(false);
 
   const trackRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null); // ⬅️ ВАЖНО
 
   // =========================
-  // DEVICE CHECK (SAFE)
+  // DEVICE CHECK
   // =========================
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 768);
@@ -28,35 +29,38 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   }, []);
 
   // =========================
-  // CENTER ACTIVE
+  // CENTER ACTIVE (iOS FIX)
   // =========================
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    const viewport = viewportRef.current;
+    if (!track || !viewport) return;
 
     const activeEl = track.children[index] as HTMLElement;
     if (!activeEl) return;
 
+    const viewportWidth = viewport.getBoundingClientRect().width;
+
     const offset =
       activeEl.offsetLeft +
       activeEl.offsetWidth / 2 -
-      window.innerWidth / 2;
+      viewportWidth / 2;
 
     track.style.transition = "transform 0.6s cubic-bezier(0.16,1,0.3,1)";
-    track.style.transform = `translateX(-${offset}px)`;
+    track.style.transform = `translate3d(-${offset}px, 0, 0)`; // ⬅️ GPU FIX
   }, [index]);
 
   // =========================
-  // LOOP FIX (SAFE)
+  // LOOP FIX
   // =========================
   useEffect(() => {
     const segment = images.length;
     if (index < segment || index > extended.length - segment) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (!trackRef.current) return;
         trackRef.current.style.transition = "none";
         setIndex(middleIndex);
-      }, 0);
+      });
     }
   }, [index, extended.length, images.length, middleIndex]);
 
@@ -90,10 +94,13 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // =========================
   return (
     <section className="w-full bg-black py-16">
-      <div className="relative overflow-hidden h-[560px]">
+      <div
+        ref={viewportRef}
+        className="relative overflow-hidden h-[560px]"
+      >
         <div
           ref={trackRef}
-          className="absolute left-0 bottom-0 flex gap-8"
+          className="absolute left-0 bottom-0 flex gap-8 will-change-transform"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
@@ -125,7 +132,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                     width: "100%",
                     height: "100%",
                     transform: `scale(${scale})`,
-                    transition: "transform 0.6s cubic-bezier(0.16,1,0.3,1)",
+                    transition:
+                      "transform 0.6s cubic-bezier(0.16,1,0.3,1)",
                   }}
                 />
               </div>
