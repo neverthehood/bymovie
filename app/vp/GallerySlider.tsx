@@ -19,9 +19,9 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // =========================
   // CONFIG
   // =========================
-  const gap = 16; // расстояние между фото (уменьшили)
+  const gap = 16; // плотное расстояние между фото
 
-  // snap-ячейка (ВСЕГДА фикс)
+  // SNAP-ячейка (ВСЕГДА фиксированная)
   const snapW = 300;
   const snapH = 480;
 
@@ -73,7 +73,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
     setActive(closest);
 
-    // fake-loop jump (без анимации)
+    // fake loop jump (без анимации)
     if (closest < total || closest >= total * 2) {
       el.scrollLeft = (snapW + gap) * (total + (closest % total));
     }
@@ -177,16 +177,19 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                   snap-center shrink-0
                   flex items-center justify-center
                   cursor-pointer
+                  bg-black   // ⬅️ ВОТ ЭТО
                 "
                 style={{
                   width: snapW,
                   height: snapH,
                 }}
               >
-                {/* INNER BOX — РЕАЛЬНО МЕНЯЕТСЯ */}
+
+                {/* INNER BOX — МЕНЯЕТ РАЗМЕР */}
                 <div
                   className="
-                    flex items-center justify-center overflow-hidden
+                    relative
+                    overflow-hidden
                     transition-[width,height] duration-300 ease-out
                   "
                   style={{
@@ -194,19 +197,18 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                     height: innerH,
                   }}
                 >
+                  {/* IMAGE — ABSOLUTE (FIX WHITE LINE) */}
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
                     draggable={false}
                     className="
-                      block
-                      w-full
-                      min-h-[102%]
+                      absolute inset-0
+                      w-full h-full
                       object-cover
                       select-none pointer-events-none
                     "
                   />
-
                 </div>
               </div>
             );
