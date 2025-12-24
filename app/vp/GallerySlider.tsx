@@ -201,7 +201,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                     className="
                       block
                       w-full
-                      min-h-[101%]
+                      min-h-[102%]
                       object-cover
                       select-none pointer-events-none
                     "
