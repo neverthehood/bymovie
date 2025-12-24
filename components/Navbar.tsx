@@ -59,11 +59,11 @@ export default function Navbar() {
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={105}
-            height={28}
-            className="object-contain w-[105px] h-auto"
-            priority
+            width={160}      // для Next.js (intrinsic)
+            height={40}
+            className="w-[100px] md:w-[160px] h-auto object-contain"
           />
+
         </a>
 
         <button onClick={() => setOpen(true)}>
