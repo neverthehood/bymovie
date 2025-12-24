@@ -8,134 +8,202 @@ type Slide = {
 };
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
-  const repeats = 7;
-  const extended = Array.from({ length: repeats }, () => images).flat();
-  const middleIndex = Math.floor(extended.length / 2);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScroll = useRef(false);
 
-  const [index, setIndex] = useState(middleIndex);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const total = images.length;
+  const looped = [...images, ...images, ...images];
 
-  const trackRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null); // ⬅️ ВАЖНО
+  const [active, setActive] = useState(total);
 
   // =========================
-  // DEVICE CHECK
+  // CONFIG
   // =========================
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+  const gap = 16; // расстояние между фото (уменьшили)
 
-  // =========================
-  // CENTER ACTIVE (iOS FIX)
-  // =========================
-  useEffect(() => {
-    const track = trackRef.current;
-    const viewport = viewportRef.current;
-    if (!track || !viewport) return;
+  // snap-ячейка (ВСЕГДА фикс)
+  const snapW = 300;
+  const snapH = 480;
 
-    const activeEl = track.children[index] as HTMLElement;
-    if (!activeEl) return;
+  // обычный размер
+  const baseW = 220;
+  const baseH = 320;
 
-    const viewportWidth = viewport.getBoundingClientRect().width;
+  // активный
+  const activeWMobile = 280;
+  const activeHMobile = 440;
+  const activeWDesktop = 300;
+  const activeHDesktop = 480;
 
-    const offset =
-      activeEl.offsetLeft +
-      activeEl.offsetWidth / 2 -
-      viewportWidth / 2;
-
-    track.style.transition = "transform 0.6s cubic-bezier(0.16,1,0.3,1)";
-    track.style.transform = `translate3d(-${offset}px, 0, 0)`; // ⬅️ GPU FIX
-  }, [index]);
+  const isDesktop =
+    typeof window !== "undefined" && window.innerWidth >= 768;
 
   // =========================
-  // LOOP FIX
+  // INIT CENTER
   // =========================
   useEffect(() => {
-    const segment = images.length;
-    if (index < segment || index > extended.length - segment) {
-      requestAnimationFrame(() => {
-        if (!trackRef.current) return;
-        trackRef.current.style.transition = "none";
-        setIndex(middleIndex);
-      });
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    el.scrollLeft = (snapW + gap) * total;
+  }, [total]);
+
+  // =========================
+  // ACTIVE + LOOP
+  // =========================
+  const onScroll = () => {
+    const el = scrollerRef.current;
+    if (!el || isProgrammaticScroll.current) return;
+
+    const center = el.scrollLeft + el.clientWidth / 2;
+
+    let closest = 0;
+    let min = Infinity;
+
+    Array.from(el.children).forEach((child, i) => {
+      const c = child as HTMLElement;
+      const childCenter = c.offsetLeft + c.offsetWidth / 2;
+      const dist = Math.abs(center - childCenter);
+
+      if (dist < min) {
+        min = dist;
+        closest = i;
+      }
+    });
+
+    setActive(closest);
+
+    // fake-loop jump (без анимации)
+    if (closest < total || closest >= total * 2) {
+      el.scrollLeft = (snapW + gap) * (total + (closest % total));
     }
-  }, [index, extended.length, images.length, middleIndex]);
-
-  // =========================
-  // CONTROLS
-  // =========================
-  const next = () => setIndex((i) => i + 1);
-  const prev = () => setIndex((i) => i - 1);
-
-  // =========================
-  // TOUCH
-  // =========================
-  const startX = useRef<number | null>(null);
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    startX.current = e.touches[0].clientX;
   };
 
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (startX.current === null) return;
-    const delta = startX.current - e.changedTouches[0].clientX;
+  // =========================
+  // SCROLL TO INDEX (CLICK / BUTTONS)
+  // =========================
+  const scrollToIndex = (i: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
 
-    if (delta > 50) next();
-    if (delta < -50) prev();
+    isProgrammaticScroll.current = true;
 
-    startX.current = null;
+    el.scrollTo({
+      left: (snapW + gap) * i,
+      behavior: "smooth",
+    });
+
+    setTimeout(() => {
+      isProgrammaticScroll.current = false;
+      onScroll();
+    }, 200);
   };
+
+  // =========================
+  // BUTTONS
+  // =========================
+  const prev = () => scrollToIndex(active - 1);
+  const next = () => scrollToIndex(active + 1);
 
   // =========================
   // RENDER
   // =========================
   return (
-    <section className="w-full bg-black py-16">
-      <div
-        ref={viewportRef}
-        className="relative overflow-hidden h-[560px]"
-      >
-        <div
-          ref={trackRef}
-          className="absolute left-0 bottom-0 flex gap-8 will-change-transform"
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
+    <section className="w-full bg-black py-16 relative">
+      {/* DESKTOP CONTROLS */}
+      <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
+        <button
+          onClick={prev}
+          aria-label="Previous"
+          className="
+            w-11 h-11 rounded-full
+            flex items-center justify-center
+            border border-white/30 text-white
+            hover:border-white hover:bg-white/10
+            transition
+          "
         >
-          {extended.map((img, i) => {
-            const isActive = i === index;
+          ‹
+        </button>
+        <button
+          onClick={next}
+          aria-label="Next"
+          className="
+            w-11 h-11 rounded-full
+            flex items-center justify-center
+            border border-white/30 text-white
+            hover:border-white hover:bg-white/10
+            transition
+          "
+        >
+          ›
+        </button>
+      </div>
 
-            const baseW = isDesktop ? 240 : 220;
-            const baseH = isDesktop ? 360 : 320;
-            const scale = isActive ? 1.15 : 1;
+      {/* VIEWPORT */}
+      <div className="relative h-[520px]">
+        <div
+          ref={scrollerRef}
+          onScroll={onScroll}
+          className="
+            absolute inset-0
+            flex gap-4 overflow-x-auto
+            snap-x snap-mandatory
+            px-[50vw]
+            scrollbar-none
+          "
+        >
+          {looped.map((img, i) => {
+            const isActive = i === active;
+
+            const innerW = isActive
+              ? isDesktop
+                ? activeWDesktop
+                : activeWMobile
+              : baseW;
+
+            const innerH = isActive
+              ? isDesktop
+                ? activeHDesktop
+                : activeHMobile
+              : baseH;
 
             return (
+              // SNAP ITEM — ФИКСИРОВАННЫЙ
               <div
                 key={i}
-                className={`flex items-center justify-center ${
-                  isActive ? "z-10" : "opacity-40"
-                }`}
+                onClick={() => scrollToIndex(i)}
+                className="
+                  snap-center shrink-0
+                  flex items-center justify-center
+                  cursor-pointer
+                "
                 style={{
-                  width: baseW,
-                  height: baseH,
-                  transition: "opacity 0.3s",
+                  width: snapW,
+                  height: snapH,
                 }}
               >
-                <img
-                  src={img.src}
-                  alt={img.alt ?? ""}
-                  draggable={false}
-                  className="rounded object-cover select-none pointer-events-none"
+                {/* INNER BOX — РЕАЛЬНО МЕНЯЕТСЯ */}
+                <div
+                  className="
+                    flex items-center justify-center
+                    transition-[width,height] duration-300 ease-out
+                  "
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    transform: `scale(${scale})`,
-                    transition:
-                      "transform 0.6s cubic-bezier(0.16,1,0.3,1)",
+                    width: innerW,
+                    height: innerH,
                   }}
-                />
+                >
+                  <img
+                    src={img.src}
+                    alt={img.alt ?? ""}
+                    draggable={false}
+                    className="
+                      w-full h-full object-cover
+                      select-none pointer-events-none
+                    "
+                  />
+                </div>
               </div>
             );
           })}
