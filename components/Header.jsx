@@ -24,9 +24,10 @@ export default function Header() {
           height={40}
           className="
             object-contain
-            w-[100px] md:w-[160px]
-            h-[28px] md:h-auto
+            h-[28px] md:h-[40px]
+            w-auto
           "
+
           priority
         />
       </a>
