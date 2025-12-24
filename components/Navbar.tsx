@@ -18,7 +18,6 @@ export default function Navbar() {
           text-white text-base tracking-[0.18em]
         "
       >
-        {/* LEFT */}
         <div className="flex gap-44">
           <a href="#weare" className="uppercase hover:text-[#D7F000] transition">
             We Are
@@ -28,7 +27,6 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* CENTER LOGO — DESKTOP */}
         <a href="/" className="flex items-center justify-center">
           <Image
             src="/images/logo.png"
@@ -40,7 +38,6 @@ export default function Navbar() {
           />
         </a>
 
-        {/* RIGHT */}
         <div className="flex gap-44">
           <a href="#projects" className="uppercase hover:text-[#D7F000] transition">
             Projects
@@ -51,19 +48,15 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* MOBILE NAV TOP BAR — КАК В NavbarVP */}
+      {/* MOBILE NAV TOP BAR — FIXED LOGO */}
       <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-5 text-white">
         <a href="/" className="flex items-center">
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={160}      // для aspect-ratio
-            height={40}
-            className="
-              object-contain
-              w-[100px]      // ← РЕАЛЬНЫЙ размер на мобиле
-              h-auto
-            "
+            width={105}
+            height={28}
+            className="object-contain h-[28px] w-auto"
             priority
           />
         </a>
@@ -90,14 +83,14 @@ export default function Navbar() {
             <FiX size={28} />
           </button>
 
-          {/* LOGO INSIDE MOBILE MENU — тоже как в NavbarVP */}
+          {/* LOGO INSIDE MOBILE MENU — FIXED */}
           <a href="/" onClick={() => setOpen(false)} className="mb-8">
             <Image
               src="/images/logo.png"
               alt="BYMOVIE Logo"
-              width={160}
-              height={40}
-              className="object-contain w-[105px] h-auto"
+              width={105}
+              height={28}
+              className="object-contain h-[28px] w-auto"
             />
           </a>
 
