@@ -97,7 +97,7 @@ export default function NavbarVP() {
               height={28}
               className="
                 object-contain
-                w-[120px]
+                w-[105px]
                 h-auto
               "
             />
