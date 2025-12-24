@@ -52,24 +52,27 @@ export default function Navbar() {
       </nav>
 
       {/* MOBILE NAV TOP BAR */}
-      <div className="fixed -top-6 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-6 text-white">
-        
-        {/* MOBILE LOGO — тоже картинка */}
+      <div className="fixed -top-5 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-6 text-white">
         <a href="/" className="flex items-center">
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
-            width={160}      
+            width={160}
             height={40}
-            className="w-[100px] md:w-[160px] h-auto object-contain"
+            className="
+              object-contain
+              w-[100px]
+              h-auto
+            "
+            priority
           />
-
         </a>
 
         <button onClick={() => setOpen(true)}>
           <FiMenu size={26} />
         </button>
       </div>
+
 
       {/* MOBILE FULLSCREEN MENU */}
       {open && (
