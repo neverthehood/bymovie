@@ -153,7 +153,7 @@ export default function ProjectsSection() {
               className={`relative w-full aspect-square overflow-hidden cursor-pointer transition-all duration-300
                 ${!isMobile && active !== null && !isActive ? "blur-sm brightness-[0.45]" : ""}
               `}
-
+            >
               <video
                 src={p.video}
                 poster={p.poster}
@@ -163,6 +163,7 @@ export default function ProjectsSection() {
                 autoPlay={isMobile}
                 className="absolute inset-0 w-full h-full object-cover"
               />
+
 
               {!isMobile && (
                 <div
