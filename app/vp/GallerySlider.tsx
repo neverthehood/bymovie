@@ -51,8 +51,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const snapW = 300;
   const snapH = 480;
 
-  const baseW = 220;
-  const baseH = 320;
+  const baseW = isDesktop ? 220 : 250;
+  const baseH = isDesktop ? 320 : 360;
 
   const activeWMobile = 280;
   const activeHMobile = 440;
