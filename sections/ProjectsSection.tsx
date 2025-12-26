@@ -150,11 +150,10 @@ export default function ProjectsSection() {
               onClick={() => setModalIndex(idx)}
               onMouseEnter={() => !isMobile && setActive(idx)}
               onMouseLeave={() => !isMobile && setActive(null)}
-              className={`relative w-full overflow-hidden cursor-pointer transition-all duration-300
+              className={`relative w-full aspect-square overflow-hidden cursor-pointer transition-all duration-300
                 ${!isMobile && active !== null && !isActive ? "blur-sm brightness-[0.45]" : ""}
-                ${isMobile ? "h-[480px]" : "h-[420px]"}
               `}
-            >
+
               <video
                 src={p.video}
                 poster={p.poster}
