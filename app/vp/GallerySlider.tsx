@@ -15,6 +15,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const endTimer = useRef<number | null>(null);
   const pendingIndex = useRef<number | null>(null);
 
+  const gestureStartIndex = useRef<number | null>(null); // 🔒
+
   const total = images.length;
   const looped = [...images, ...images, ...images];
 
@@ -57,7 +59,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const activeWDesktop = 300;
   const activeHDesktop = 480;
 
-  const FINALIZE_DELAY_MOBILE = 260;
+  const FINALIZE_DELAY_MOBILE = 280;
   const FINALIZE_DELAY_DESKTOP = 180;
 
   // =========================
@@ -67,9 +69,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     const el = scrollerRef.current;
     if (!el) return;
 
-    const start = (snapW + gap) * total;
-    el.scrollLeft = start;
-
+    el.scrollLeft = (snapW + gap) * total;
     setActive(total);
     setActiveVisual(total);
   }, [total, gap]);
@@ -99,12 +99,28 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     return closest;
   };
 
+  const clampMobileStep = (from: number, to: number) => {
+    if (isDesktop) return to;
+    if (to > from) return from + 1;
+    if (to < from) return from - 1;
+    return from;
+  };
+
   const finalize = () => {
     const el = scrollerRef.current;
     if (!el || pendingIndex.current === null) return;
 
-    const closest = pendingIndex.current;
+    let closest = pendingIndex.current;
+
+    if (!isDesktop && gestureStartIndex.current !== null) {
+      closest = clampMobileStep(
+        gestureStartIndex.current,
+        closest
+      );
+    }
+
     pendingIndex.current = null;
+    gestureStartIndex.current = null;
 
     setActive(closest);
 
@@ -136,12 +152,14 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
       const closest = findClosestIndex(el);
 
-      // 🔥 МГНОВЕННОЕ визуальное обновление
+      if (gestureStartIndex.current === null) {
+        gestureStartIndex.current = active;
+      }
+
       setActiveVisual(closest);
       pendingIndex.current = closest;
 
       if (endTimer.current) clearTimeout(endTimer.current);
-
       endTimer.current = window.setTimeout(
         finalize,
         isDesktop ? FINALIZE_DELAY_DESKTOP : FINALIZE_DELAY_MOBILE
@@ -168,7 +186,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     setTimeout(() => {
       isProgrammaticScroll.current = false;
       finalize();
-    }, isDesktop ? 420 : 520);
+    }, isDesktop ? 420 : 560);
   };
 
   // =========================
@@ -242,7 +260,6 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                     relative bg-black overflow-hidden
                     transition-[width,height,transform,opacity]
                     duration-300 ease-out
-                    will-change-transform
                   "
                   style={{
                     width: w,
@@ -261,7 +278,6 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                       height: "101%",
                       left: "-0.5%",
                       top: "-0.5%",
-                      display: "block",
                       transform: "translateZ(0)",
                       backfaceVisibility: "hidden",
                     }}
