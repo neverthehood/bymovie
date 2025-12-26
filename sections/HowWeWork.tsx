@@ -248,17 +248,18 @@ export default function HowWeWork() {
                   key={i}
                   className="w-[40vw] min-w-[40vw] h-[340px] bg-[#DBFE02] px-12 py-12"
                 >
-                  <div className="text-[#101010] h-full flex flex-col justify-between">
-                    <div>
-                      <div className="opacity-50 mb-1">[{i + 1}]</div>
-                      <h3 className="text-4xl font-bold mb-6">
-                        {s.title}
-                      </h3>
-                    </div>
-                    <p className="whitespace-pre-line text-lg">
+                  <div className="text-[#101010] h-full flex flex-col items-center justify-center text-center">
+                    <div className="opacity-50 mb-3">[{i + 1}]</div>
+
+                    <h3 className="text-4xl font-bold mb-6">
+                      {s.title}
+                    </h3>
+
+                    <p className="whitespace-pre-line text-lg max-w-[80%]">
                       {s.desc}
                     </p>
                   </div>
+
                 </div>
               ))}
             </div>
