@@ -56,8 +56,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
   const activeWMobile = 280;
   const activeHMobile = 440;
-  const activeWDesktop = 300;
-  const activeHDesktop = 480;
+  const activeWDesktop = 360;
+  const activeHDesktop = 576;
 
   const FINALIZE_DELAY_MOBILE = 280;
   const FINALIZE_DELAY_DESKTOP = 180;
