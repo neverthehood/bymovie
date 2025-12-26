@@ -9,73 +9,66 @@ export default function Navbar() {
 
   return (
     <>
-      {/* NAVBAR */}
+      {/* ================= DESKTOP NAV (НЕ ТРОГАЕМ) ================= */}
       <nav
         className="
-          fixed top-0 left-0 w-full z-[999]
-          flex items-center
-          px-6 md:px-16
-          py-5 md:py-8
-          text-white tracking-[0.18em]
+          fixed -top-5 left-0 w-full z-[999]
+          hidden md:flex items-center justify-between
+          px-16 py-8
+          text-white text-base tracking-[0.18em]
         "
       >
-        {/* LEFT (mobile: logo, desktop: menu) */}
-        <div className="flex items-center flex-1">
-          {/* DESKTOP LEFT MENU */}
-          <div className="hidden md:flex gap-44">
-            <a href="#weare" className="uppercase hover:text-[#D7F000] transition">
-              We Are
-            </a>
-            <a href="#services" className="uppercase hover:text-[#D7F000] transition">
-              Services
-            </a>
-          </div>
-
-          {/* MOBILE LOGO (left) */}
-          <div className="md:hidden">
-            <Image
-              src="/images/logo.png"
-              alt="BYMOVIE Logo"
-              width={105}
-              height={28}
-              style={{ height: 18, width: "auto" }} // 💥 гарантированно работает
-              priority
-            />
-          </div>
+        <div className="flex gap-44">
+          <a href="#weare" className="uppercase hover:text-[#D7F000] transition">
+            We Are
+          </a>
+          <a href="#services" className="uppercase hover:text-[#D7F000] transition">
+            Services
+          </a>
         </div>
 
-        {/* CENTER LOGO (desktop only) */}
-        <div className="hidden md:flex flex-1 justify-center">
+        {/* DESKTOP LOGO */}
+        <a href="/" className="flex items-center justify-center">
           <Image
             src="/images/logo.png"
             alt="BYMOVIE Logo"
             width={160}
             height={40}
-            className="object-contain"
+            className="object-contain h-[40px] w-auto"
             priority
           />
-        </div>
+        </a>
 
-        {/* RIGHT */}
-        <div className="flex items-center justify-end flex-1">
-          {/* DESKTOP RIGHT MENU */}
-          <div className="hidden md:flex gap-44">
-            <a href="#projects" className="uppercase hover:text-[#D7F000] transition">
-              Projects
-            </a>
-            <a href="#contacts" className="uppercase hover:text-[#D7F000] transition">
-              Contacts
-            </a>
-          </div>
-
-          {/* MOBILE BURGER */}
-          <button className="md:hidden" onClick={() => setOpen(true)}>
-            <FiMenu size={26} />
-          </button>
+        <div className="flex gap-44">
+          <a href="#projects" className="uppercase hover:text-[#D7F000] transition">
+            Projects
+          </a>
+          <a href="#contacts" className="uppercase hover:text-[#D7F000] transition">
+            Contacts
+          </a>
         </div>
       </nav>
 
-      {/* MOBILE FULLSCREEN MENU */}
+      {/* ================= MOBILE TOP BAR ================= */}
+      <div className="fixed top-0 left-0 w-full z-[999] flex md:hidden items-center justify-between px-6 py-5 text-white">
+        {/* MOBILE LOGO — БОЛЬШЕ */}
+        <a href="/" className="flex items-center">
+          <Image
+            src="/images/logo.png"
+            alt="BYMOVIE Logo"
+            width={160}      // intrinsic
+            height={40}
+            className="object-contain h-[36px] w-auto"
+            priority
+          />
+        </a>
+
+        <button onClick={() => setOpen(true)}>
+          <FiMenu size={28} />
+        </button>
+      </div>
+
+      {/* ================= MOBILE FULLSCREEN MENU ================= */}
       {open && (
         <div
           className="
@@ -89,18 +82,24 @@ export default function Navbar() {
             className="absolute top-6 right-6"
             onClick={() => setOpen(false)}
           >
-            <FiX size={28} />
+            <FiX size={30} />
           </button>
 
-          {/* SAME LOGO, BUT SMALL */}
-          <Image
-            src="/images/logo.png"
-            alt="BYMOVIE Logo"
-            width={105}
-            height={28}
-            style={{ height: 24, width: "auto" }}
-            className="mb-8"
-          />
+          {/* MOBILE MENU LOGO — ЕЩЁ ЧУТЬ БОЛЬШЕ */}
+          <a
+            href="/"
+            onClick={() => setOpen(false)}
+            className="mb-10"
+          >
+            <Image
+              src="/images/logo.png"
+              alt="BYMOVIE Logo"
+              width={200}
+              height={50}
+              className="object-contain h-[44px] w-auto"
+              priority
+            />
+          </a>
 
           <a href="#weare" onClick={() => setOpen(false)}>We Are</a>
           <a href="#services" onClick={() => setOpen(false)}>Services</a>
