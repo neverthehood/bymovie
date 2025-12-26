@@ -126,7 +126,11 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     rafId.current = requestAnimationFrame(() => {
       rafId.current = null;
 
-      pendingIndex.current = findClosestIndex(el);
+      const closest = findClosestIndex(el);
+
+      // 🔥 МГНОВЕННОЕ визуальное обновление
+      setActiveVisual(closest);
+      pendingIndex.current = closest;
 
       if (endTimer.current) clearTimeout(endTimer.current);
       endTimer.current = window.setTimeout(
@@ -135,6 +139,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
       );
     });
   };
+
 
   // =========================
   // PROGRAMMATIC (BUTTONS / CLICK)
