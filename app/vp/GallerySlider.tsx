@@ -9,8 +9,8 @@ type Slide = {
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-
   const isProgrammaticScroll = useRef(false);
+
   const rafId = useRef<number | null>(null);
   const endTimer = useRef<number | null>(null);
   const pendingIndex = useRef<number | null>(null);
@@ -30,8 +30,15 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     const mq = window.matchMedia("(min-width: 768px)");
     const update = () => setIsDesktop(mq.matches);
     update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+
+    // Safari fallback
+    // @ts-ignore
+    mq.addEventListener ? mq.addEventListener("change", update) : mq.addListener(update);
+
+    return () => {
+      // @ts-ignore
+      mq.removeEventListener ? mq.removeEventListener("change", update) : mq.removeListener(update);
+    };
   }, []);
 
   // =========================
@@ -50,9 +57,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const activeWDesktop = 300;
   const activeHDesktop = 480;
 
-  const FINALIZE_DELAY_MOBILE = 480;
-  const FINALIZE_DELAY_DESKTOP = 280;
-  const BUTTON_SCROLL_DELAY = 420;
+  const FINALIZE_DELAY_MOBILE = 260;
+  const FINALIZE_DELAY_DESKTOP = 180;
 
   // =========================
   // INIT CENTER
@@ -61,7 +67,9 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     const el = scrollerRef.current;
     if (!el) return;
 
-    el.scrollLeft = (snapW + gap) * total;
+    const start = (snapW + gap) * total;
+    el.scrollLeft = start;
+
     setActive(total);
     setActiveVisual(total);
   }, [total, gap]);
@@ -69,7 +77,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // =========================
   // HELPERS
   // =========================
-  const normalize = (i: number) => ((i % total) + total) % total;
+  const normalize = (i: number) =>
+    ((i % total) + total) % total;
 
   const findClosestIndex = (el: HTMLDivElement) => {
     const center = el.scrollLeft + el.clientWidth / 2;
@@ -90,28 +99,28 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     return closest;
   };
 
-  // =========================
-  // FINALIZE
-  // =========================
   const finalize = () => {
     const el = scrollerRef.current;
     if (!el || pendingIndex.current === null) return;
 
-    let idx = pendingIndex.current;
+    const closest = pendingIndex.current;
+    pendingIndex.current = null;
 
-    if (idx < total || idx >= total * 2) {
-      const target = total + normalize(idx);
+    setActive(closest);
+
+    if (closest < total || closest >= total * 2) {
+      const target = total + normalize(closest);
+
       isProgrammaticScroll.current = true;
       el.scrollLeft = (snapW + gap) * target;
-      idx = target;
+
+      setActive(target);
+      setActiveVisual(target);
+
+      requestAnimationFrame(() => {
+        isProgrammaticScroll.current = false;
+      });
     }
-
-    setActive(idx);
-    setActiveVisual(idx);
-
-    requestAnimationFrame(() => {
-      isProgrammaticScroll.current = false;
-    });
   };
 
   // =========================
@@ -120,7 +129,6 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const onScroll = () => {
     const el = scrollerRef.current;
     if (!el || isProgrammaticScroll.current) return;
-
     if (rafId.current) return;
 
     rafId.current = requestAnimationFrame(() => {
@@ -133,6 +141,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
       pendingIndex.current = closest;
 
       if (endTimer.current) clearTimeout(endTimer.current);
+
       endTimer.current = window.setTimeout(
         finalize,
         isDesktop ? FINALIZE_DELAY_DESKTOP : FINALIZE_DELAY_MOBILE
@@ -140,15 +149,15 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     });
   };
 
-
   // =========================
-  // PROGRAMMATIC (BUTTONS / CLICK)
+  // PROGRAMMATIC
   // =========================
   const scrollToIndex = (i: number) => {
     const el = scrollerRef.current;
     if (!el) return;
 
     isProgrammaticScroll.current = true;
+    setActiveVisual(i);
     pendingIndex.current = i;
 
     el.scrollTo({
@@ -159,7 +168,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     setTimeout(() => {
       isProgrammaticScroll.current = false;
       finalize();
-    }, BUTTON_SCROLL_DELAY);
+    }, isDesktop ? 420 : 520);
   };
 
   // =========================
@@ -177,30 +186,17 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // =========================
   return (
     <section className="w-full bg-black py-16 relative">
-
-      {/* DESKTOP CONTROLS — ВОЗВРАЩЕНЫ */}
+      {/* DESKTOP CONTROLS */}
       <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
         <button
           onClick={() => scrollToIndex(active - 1)}
-          className="
-            w-11 h-11 rounded-full
-            flex items-center justify-center
-            border border-white/30 text-white
-            hover:border-white hover:bg-white/10
-            transition
-          "
+          className="w-11 h-11 rounded-full border border-white/30 text-white hover:bg-white/10 transition"
         >
           ‹
         </button>
         <button
           onClick={() => scrollToIndex(active + 1)}
-          className="
-            w-11 h-11 rounded-full
-            flex items-center justify-center
-            border border-white/30 text-white
-            hover:border-white hover:bg-white/10
-            transition
-          "
+          className="w-11 h-11 rounded-full border border-white/30 text-white hover:bg-white/10 transition"
         >
           ›
         </button>
@@ -217,7 +213,11 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
             px-[50vw]
             scrollbar-none
           "
-          style={{ gap }}
+          style={{
+            gap,
+            WebkitOverflowScrolling: "touch",
+            transform: "translateZ(0)",
+          }}
         >
           {looped.map((img, i) => {
             const isActive = i === activeVisual;
@@ -240,7 +240,9 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                 <div
                   className="
                     relative bg-black overflow-hidden
-                    transition-all duration-300 ease-out
+                    transition-[width,height,transform,opacity]
+                    duration-300 ease-out
+                    will-change-transform
                   "
                   style={{
                     width: w,
@@ -259,6 +261,9 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                       height: "101%",
                       left: "-0.5%",
                       top: "-0.5%",
+                      display: "block",
+                      transform: "translateZ(0)",
+                      backfaceVisibility: "hidden",
                     }}
                   />
                 </div>
