@@ -9,41 +9,20 @@ type Slide = {
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const isProgrammaticScroll = useRef(false);
-
-  const rafId = useRef<number | null>(null);
-  const endTimer = useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const isProgrammatic = useRef(false);
 
   const total = images.length;
   const looped = [...images, ...images, ...images];
 
-  const [active, setActive] = useState(total);
+  // логический индекс (ВАЖНО)
+  const [activeLogical, setActiveLogical] = useState(0);
   const [activeVisual, setActiveVisual] = useState(total);
-
-  // =========================
-  // RESPONSIVE
-  // =========================
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-
-    // safari fallback
-    // @ts-ignore
-    mq.addEventListener ? mq.addEventListener("change", update) : mq.addListener(update);
-
-    return () => {
-      // @ts-ignore
-      mq.removeEventListener ? mq.removeEventListener("change", update) : mq.removeListener(update);
-    };
-  }, []);
 
   // =========================
   // CONFIG
   // =========================
-  const gap = isDesktop ? 16 : 28; // ← больше расстояние на мобиле
+  const gap = 20;
 
   const snapW = 300;
   const snapH = 480;
@@ -56,94 +35,75 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const activeWDesktop = 300;
   const activeHDesktop = 480;
 
+  const isDesktop =
+    typeof window !== "undefined" && window.innerWidth >= 768;
+
+  const logicalIndex = (i: number) =>
+    ((i % total) + total) % total;
+
   // =========================
   // INIT CENTER
   // =========================
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
-
     el.scrollLeft = (snapW + gap) * total;
-    setActive(total);
-    setActiveVisual(total);
-  }, [total, gap]);
+  }, [total]);
 
   // =========================
-  // HELPERS
+  // SCROLL HANDLER (THROTTLED)
   // =========================
-  const normalize = (i: number) =>
-    ((i % total) + total) % total;
+  const handleScroll = () => {
+    if (rafRef.current) return;
 
-  const findClosestIndex = (el: HTMLDivElement) => {
-    const center = el.scrollLeft + el.clientWidth / 2;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
 
-    let closest = 0;
-    let min = Infinity;
+      const el = scrollerRef.current;
+      if (!el || isProgrammatic.current) return;
 
-    const kids = el.children;
-    for (let i = 0; i < kids.length; i++) {
-      const c = kids[i] as HTMLElement;
-      const childCenter = c.offsetLeft + c.offsetWidth / 2;
-      const dist = Math.abs(center - childCenter);
-      if (dist < min) {
-        min = dist;
-        closest = i;
-      }
-    }
-    return closest;
-  };
+      const center = el.scrollLeft + el.clientWidth / 2;
 
-  const finalize = () => {
-    const el = scrollerRef.current;
-    if (!el) return;
+      let closest = 0;
+      let min = Infinity;
 
-    const closest = findClosestIndex(el);
-    setActive(closest);
+      Array.from(el.children).forEach((child, i) => {
+        const c = child as HTMLElement;
+        const childCenter =
+          c.offsetLeft + c.offsetWidth / 2;
+        const dist = Math.abs(center - childCenter);
 
-    if (closest < total || closest >= total * 2) {
-      const target = total + normalize(closest);
-      isProgrammaticScroll.current = true;
-      el.scrollLeft = (snapW + gap) * target;
-      setActive(target);
-      setActiveVisual(target);
-
-      requestAnimationFrame(() => {
-        isProgrammaticScroll.current = false;
+        if (dist < min) {
+          min = dist;
+          closest = i;
+        }
       });
-    }
-  };
 
-  // =========================
-  // SCROLL
-  // =========================
-  const onScroll = () => {
-    const el = scrollerRef.current;
-    if (!el || isProgrammaticScroll.current) return;
-
-    if (rafId.current) return;
-
-    rafId.current = requestAnimationFrame(() => {
-      rafId.current = null;
-
-      const closest = findClosestIndex(el);
       setActiveVisual(closest);
+      setActiveLogical(logicalIndex(closest));
 
-      if (endTimer.current) clearTimeout(endTimer.current);
-      endTimer.current = window.setTimeout(() => {
-        finalize();
-      }, 220); // ← МЕДЛЕННЕЕ финализация
+      // LOOP JUMP — спокойно и безопасно
+      if (closest < total || closest >= total * 2) {
+        isProgrammatic.current = true;
+
+        el.scrollLeft =
+          (snapW + gap) * (total + logicalIndex(closest));
+
+        requestAnimationFrame(() => {
+          isProgrammatic.current = false;
+        });
+      }
     });
   };
 
   // =========================
-  // PROGRAMMATIC
+  // SCROLL TO INDEX (BUTTON / TAP)
   // =========================
   const scrollToIndex = (i: number) => {
     const el = scrollerRef.current;
     if (!el) return;
 
-    isProgrammaticScroll.current = true;
-    setActiveVisual(i);
+    isProgrammatic.current = true;
 
     el.scrollTo({
       left: (snapW + gap) * i,
@@ -151,20 +111,12 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     });
 
     setTimeout(() => {
-      isProgrammaticScroll.current = false;
-      finalize();
-    }, 320); // ← медленнее кнопки
+      isProgrammatic.current = false;
+    }, isDesktop ? 400 : 500);
   };
 
-  // =========================
-  // CLEANUP
-  // =========================
-  useEffect(() => {
-    return () => {
-      if (rafId.current) cancelAnimationFrame(rafId.current);
-      if (endTimer.current) clearTimeout(endTimer.current);
-    };
-  }, []);
+  const prev = () => scrollToIndex(activeVisual - 1);
+  const next = () => scrollToIndex(activeVisual + 1);
 
   // =========================
   // RENDER
@@ -173,56 +125,72 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     <section className="w-full bg-black py-16 relative">
       {/* DESKTOP CONTROLS */}
       <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
-        <button onClick={() => scrollToIndex(active - 1)} className="w-11 h-11 rounded-full border border-white/30 text-white">‹</button>
-        <button onClick={() => scrollToIndex(active + 1)} className="w-11 h-11 rounded-full border border-white/30 text-white">›</button>
+        <button
+          onClick={prev}
+          className="w-11 h-11 rounded-full border border-white/30 text-white transition hover:bg-white/10"
+        >
+          ‹
+        </button>
+        <button
+          onClick={next}
+          className="w-11 h-11 rounded-full border border-white/30 text-white transition hover:bg-white/10"
+        >
+          ›
+        </button>
       </div>
 
+      {/* VIEWPORT */}
       <div className="relative h-[520px]">
         <div
           ref={scrollerRef}
-          onScroll={onScroll}
+          onScroll={handleScroll}
           className="
             absolute inset-0
             flex overflow-x-auto
-            snap-x snap-mandatory
             px-[50vw]
             scrollbar-none
           "
           style={{
-            gap,
+            gap: `${gap}px`,
             WebkitOverflowScrolling: "touch",
-            transform: "translateZ(0)",
           }}
         >
           {looped.map((img, i) => {
-            const isActive = i === activeVisual;
+            const isActive =
+              logicalIndex(i) === activeLogical;
 
             const w = isActive
-              ? isDesktop ? activeWDesktop : activeWMobile
+              ? isDesktop
+                ? activeWDesktop
+                : activeWMobile
               : baseW;
 
             const h = isActive
-              ? isDesktop ? activeHDesktop : activeHMobile
+              ? isDesktop
+                ? activeHDesktop
+                : activeHMobile
               : baseH;
 
             return (
               <div
                 key={i}
                 onClick={() => scrollToIndex(i)}
-                className="snap-center shrink-0 flex items-center justify-center cursor-pointer"
+                className="shrink-0 flex items-center justify-center cursor-pointer"
                 style={{ width: snapW, height: snapH }}
               >
                 <div
                   className="
                     relative bg-black overflow-hidden
-                    transition-all duration-300 ease-out
+                    transition-all duration-[420ms] ease-out
                     will-change-transform
                   "
                   style={{
                     width: w,
                     height: h,
-                    transform: isActive ? "scale(1.04)" : "scale(1)",
-                    opacity: isActive ? 1 : 0.45,
+                    transform: isActive
+                      ? "scale(1.035)"
+                      : "scale(1)",
+                    opacity: isActive ? 1 : 0.5,
                   }}
                 >
                   <img
@@ -235,7 +203,6 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                       height: "101%",
                       left: "-0.5%",
                       top: "-0.5%",
-                      display: "block",
                       transform: "translateZ(0)",
                       backfaceVisibility: "hidden",
                     }}
