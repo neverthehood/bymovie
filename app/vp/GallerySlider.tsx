@@ -8,128 +8,216 @@ type Slide = {
 };
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScroll = useRef(false);
+
   const total = images.length;
   const looped = [...images, ...images, ...images];
-  const base = total;
 
-  const [active, setActive] = useState(base);
-  const trackRef = useRef<HTMLDivElement>(null);
-
-  const isDesktop =
-    typeof window !== "undefined" && window.innerWidth >= 768;
-
-  const isIOS =
-    typeof window !== "undefined" &&
-    /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const [active, setActive] = useState(total);
 
   // =========================
   // CONFIG
   // =========================
-  const gap = 16;
-  const snapW = 300;
+  const gap = 16; // плотное расстояние между фото
 
-  const scaleActive = isDesktop ? 1.08 : 1.06;
+  // SNAP-ячейка (ВСЕГДА фиксированная)
+  const snapW = 300;
+  const snapH = 480;
+
+  // обычный размер
+  const baseW = 220;
+  const baseH = 320;
+
+  // активный
+  const activeWMobile = 280;
+  const activeHMobile = 440;
+  const activeWDesktop = 300;
+  const activeHDesktop = 480;
+
+  const isDesktop =
+    typeof window !== "undefined" && window.innerWidth >= 768;
 
   // =========================
-  // iOS: translate instead of scroll
+  // INIT CENTER
   // =========================
   useEffect(() => {
-    if (!isIOS) return;
-    const el = trackRef.current;
+    const el = scrollerRef.current;
     if (!el) return;
 
-    const x = -(active * (snapW + gap));
-    el.style.transform = `translateX(${x}px)`;
-  }, [active, isIOS]);
+    el.scrollLeft = (snapW + gap) * total;
+  }, [total]);
 
   // =========================
-  // CONTROLS
+  // ACTIVE + LOOP
   // =========================
-  const next = () => {
-    setActive((i) =>
-      i >= base + total - 1 ? base : i + 1
-    );
-  };
+  const onScroll = () => {
+    const el = scrollerRef.current;
+    if (!el || isProgrammaticScroll.current) return;
 
-  const prev = () => {
-    setActive((i) =>
-      i <= base ? base + total - 1 : i - 1
-    );
+    const center = el.scrollLeft + el.clientWidth / 2;
+
+    let closest = 0;
+    let min = Infinity;
+
+    Array.from(el.children).forEach((child, i) => {
+      const c = child as HTMLElement;
+      const childCenter = c.offsetLeft + c.offsetWidth / 2;
+      const dist = Math.abs(center - childCenter);
+
+      if (dist < min) {
+        min = dist;
+        closest = i;
+      }
+    });
+
+    setActive(closest);
+
+    // fake loop jump (без анимации)
+    if (closest < total || closest >= total * 2) {
+      el.scrollLeft = (snapW + gap) * (total + (closest % total));
+    }
   };
 
   // =========================
-  // TOUCH (iOS ONLY)
+  // SCROLL TO INDEX (CLICK / BUTTONS)
   // =========================
-  const touchStart = useRef<number | null>(null);
+  const scrollToIndex = (i: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = e.touches[0].clientX;
+    isProgrammaticScroll.current = true;
+
+    el.scrollTo({
+      left: (snapW + gap) * i,
+      behavior: "smooth",
+    });
+
+    setTimeout(() => {
+      isProgrammaticScroll.current = false;
+      onScroll();
+    }, 200);
   };
 
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart.current === null) return;
-    const delta =
-      touchStart.current - e.changedTouches[0].clientX;
-
-    if (delta > 50) next();
-    if (delta < -50) prev();
-
-    touchStart.current = null;
-  };
+  // =========================
+  // BUTTONS
+  // =========================
+  const prev = () => scrollToIndex(active - 1);
+  const next = () => scrollToIndex(active + 1);
 
   // =========================
   // RENDER
   // =========================
   return (
-    <section className="w-full bg-black py-16 overflow-hidden">
+    <section className="w-full bg-black py-16 relative">
+      {/* DESKTOP CONTROLS */}
+      <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
+        <button
+          onClick={prev}
+          aria-label="Previous"
+          className="
+            w-11 h-11 rounded-full
+            flex items-center justify-center
+            border border-white/30 text-white
+            hover:border-white hover:bg-white/10
+            transition
+          "
+        >
+          ‹
+        </button>
+        <button
+          onClick={next}
+          aria-label="Next"
+          className="
+            w-11 h-11 rounded-full
+            flex items-center justify-center
+            border border-white/30 text-white
+            hover:border-white hover:bg-white/10
+            transition
+          "
+        >
+          ›
+        </button>
+      </div>
+
+      {/* VIEWPORT */}
       <div className="relative h-[520px]">
         <div
-          ref={trackRef}
-          onTouchStart={isIOS ? onTouchStart : undefined}
-          onTouchEnd={isIOS ? onTouchEnd : undefined}
+          ref={scrollerRef}
+          onScroll={onScroll}
           className="
-            absolute left-1/2 top-1/2
-            flex gap-4
-            transition-transform duration-500 ease-out
-            will-change-transform
+            absolute inset-0
+            flex gap-4 overflow-x-auto
+            snap-x snap-mandatory
+            px-[50vw]
+            scrollbar-none
           "
-          style={{
-            transform: `translate(-50%, -50%)`,
-          }}
         >
           {looped.map((img, i) => {
             const isActive = i === active;
 
+            const innerW = isActive
+              ? isDesktop
+                ? activeWDesktop
+                : activeWMobile
+              : baseW;
+
+            const innerH = isActive
+              ? isDesktop
+                ? activeHDesktop
+                : activeHMobile
+              : baseH;
+
             return (
+              // SNAP ITEM — ФИКСИРОВАННЫЙ
               <div
                 key={i}
-                className="flex items-center justify-center"
+                onClick={() => scrollToIndex(i)}
+                className="
+                  snap-center shrink-0
+                  flex items-center justify-center
+                  cursor-pointer
+                  bg-black
+                "
                 style={{
                   width: snapW,
+                  height: snapH,
                 }}
-                onClick={() => setActive(i)}
               >
+                {/* INNER BOX — МЕНЯЕТ РАЗМЕР */}
                 <div
                   className="
-                    w-[220px] h-[320px] md:w-[260px] md:h-[380px]
+                    relative
                     overflow-hidden
-                    transition-transform duration-500 ease-out
-                    transform-gpu
+                    transition-[width,height] duration-300 ease-out
                   "
                   style={{
-                    transform: `scale(${isActive ? scaleActive : 1})`,
+                    width: innerW,
+                    height: innerH,
                   }}
                 >
+                  {/* IMAGE — ABSOLUTE */}
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
                     draggable={false}
-                    className="w-full h-full object-cover select-none"
+                    className="
+                      absolute inset-0
+                      w-full h-full
+                      object-cover
+                      select-none pointer-events-none
+                    "
+                  />
+
+                  {/* BOTTOM OVERLAY — KILLS HAIRLINE */}
+                  <div
+                    className="absolute left-0 bottom-0 w-full h-[2px] bg-black pointer-events-none"
                   />
                 </div>
               </div>
             );
           })}
+
         </div>
       </div>
     </section>
