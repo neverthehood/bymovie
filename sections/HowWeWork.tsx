@@ -148,7 +148,7 @@ export default function HowWeWork() {
     const n = cards.length;
 
     const FIRST_TOP_VH = 0.32;
-    const CARD_H_VH = 0.44;
+    const CARD_H_VH = 0.35;
     const OVERLAP = 0.35;
     const EXTRA_BOTTOM = 0.25;
 
@@ -178,17 +178,33 @@ export default function HowWeWork() {
 
         const stacked =
           firstTop + i * cardH - centerY + cardH / 2;
+
         const final =
           firstTop + i * overlapPx - centerY + cardH / 2;
 
-        const p = Math.min(Math.max(step - i + 1, 0), 1);
-        const y = stacked + (final - stacked) * p;
+        const p = Math.min(
+          Math.max(step - i + 1, 0),
+          1
+        );
+
+        const extraLast =
+          i === n - 1
+            ? cardH * (0.1 + 0.01 * p)
+            : 0;
+
+        const y =
+          stacked +
+          (final - stacked) * p -
+          extraLast;
 
         card.style.transform =
           `translate(-50%, -50%) translateY(${y}px)`;
+
         card.style.zIndex = String(600 + i);
       });
+
     };
+
 
     recompute();
     onScroll();
@@ -217,7 +233,7 @@ export default function HowWeWork() {
     flex flex-col px-4 pt-44
     md:overflow-hidden"
       >
-        <h2 className="text-center text-4xl md:text-5xl font-bold mb-28 -mt-20">
+        <h2 className="text-center text-4xl md:text-5xl font-bold mb-48 md:mb-28 -mt-20">
           HOW WE WORK
         </h2>
 
