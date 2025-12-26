@@ -9,27 +9,25 @@ type Slide = {
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const isProgrammaticScroll = useRef(false);
+  const isProgrammatic = useRef(false);
 
   const total = images.length;
   const looped = [...images, ...images, ...images];
+  const baseStart = total; // начало средней копии
 
-  const [active, setActive] = useState(total);
+  const [active, setActive] = useState(baseStart);
 
   // =========================
   // CONFIG
   // =========================
-  const gap = 16; // плотное расстояние между фото
+  const gap = 16;
 
-  // SNAP-ячейка (ВСЕГДА фиксированная)
   const snapW = 300;
   const snapH = 480;
 
-  // обычный размер
   const baseW = 220;
   const baseH = 320;
 
-  // активный
   const activeWMobile = 280;
   const activeHMobile = 440;
   const activeWDesktop = 300;
@@ -39,25 +37,25 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     typeof window !== "undefined" && window.innerWidth >= 768;
 
   // =========================
-  // INIT CENTER
+  // INIT — jump to middle copy
   // =========================
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
 
-    el.scrollLeft = (snapW + gap) * total;
-  }, [total]);
+    el.scrollLeft = (snapW + gap) * baseStart;
+  }, [baseStart]);
 
   // =========================
-  // ACTIVE + LOOP
+  // SCROLL HANDLER
   // =========================
   const onScroll = () => {
     const el = scrollerRef.current;
-    if (!el || isProgrammaticScroll.current) return;
+    if (!el || isProgrammatic.current) return;
 
     const center = el.scrollLeft + el.clientWidth / 2;
 
-    let closest = 0;
+    let closest = active;
     let min = Infinity;
 
     Array.from(el.children).forEach((child, i) => {
@@ -73,20 +71,32 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
     setActive(closest);
 
-    // fake loop jump (без анимации)
-    if (closest < total || closest >= total * 2) {
-      el.scrollLeft = (snapW + gap) * (total + (closest % total));
+    // =========================
+    // SAFE FAKE LOOP (NO ANIMATION)
+    // =========================
+    if (closest < baseStart || closest >= baseStart + total) {
+      isProgrammatic.current = true;
+
+      const normalized =
+        baseStart + ((closest - baseStart + total) % total);
+
+      el.scrollLeft = (snapW + gap) * normalized;
+      setActive(normalized);
+
+      requestAnimationFrame(() => {
+        isProgrammatic.current = false;
+      });
     }
   };
 
   // =========================
-  // SCROLL TO INDEX (CLICK / BUTTONS)
+  // SCROLL TO INDEX (buttons / click)
   // =========================
   const scrollToIndex = (i: number) => {
     const el = scrollerRef.current;
     if (!el) return;
 
-    isProgrammaticScroll.current = true;
+    isProgrammatic.current = true;
 
     el.scrollTo({
       left: (snapW + gap) * i,
@@ -94,14 +104,10 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     });
 
     setTimeout(() => {
-      isProgrammaticScroll.current = false;
-      onScroll();
-    }, 200);
+      isProgrammatic.current = false;
+    }, 350);
   };
 
-  // =========================
-  // BUTTONS
-  // =========================
   const prev = () => scrollToIndex(active - 1);
   const next = () => scrollToIndex(active + 1);
 
@@ -114,27 +120,13 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
       <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
         <button
           onClick={prev}
-          aria-label="Previous"
-          className="
-            w-11 h-11 rounded-full
-            flex items-center justify-center
-            border border-white/30 text-white
-            hover:border-white hover:bg-white/10
-            transition
-          "
+          className="w-11 h-11 rounded-full border border-white/30 text-white flex items-center justify-center"
         >
           ‹
         </button>
         <button
           onClick={next}
-          aria-label="Next"
-          className="
-            w-11 h-11 rounded-full
-            flex items-center justify-center
-            border border-white/30 text-white
-            hover:border-white hover:bg-white/10
-            transition
-          "
+          className="w-11 h-11 rounded-full border border-white/30 text-white flex items-center justify-center"
         >
           ›
         </button>
@@ -169,55 +161,32 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
               : baseH;
 
             return (
-              // SNAP ITEM — ФИКСИРОВАННЫЙ
               <div
                 key={i}
                 onClick={() => scrollToIndex(i)}
-                className="
-                  snap-center shrink-0
-                  flex items-center justify-center
-                  cursor-pointer
-                  bg-black
-                "
+                className="snap-center shrink-0 flex items-center justify-center cursor-pointer"
                 style={{
                   width: snapW,
                   height: snapH,
                 }}
               >
-                {/* INNER BOX — МЕНЯЕТ РАЗМЕР */}
                 <div
-                  className="
-                    relative
-                    overflow-hidden
-                    transition-[width,height] duration-300 ease-out
-                  "
+                  className="relative transition-[width,height] duration-300 ease-out"
                   style={{
                     width: innerW,
                     height: innerH,
                   }}
                 >
-                  {/* IMAGE — ABSOLUTE */}
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
                     draggable={false}
-                    className="
-                      absolute inset-0
-                      w-full h-full
-                      object-cover
-                      select-none pointer-events-none
-                    "
-                  />
-
-                  {/* BOTTOM OVERLAY — KILLS HAIRLINE */}
-                  <div
-                    className="absolute left-0 bottom-0 w-full h-[2px] bg-black pointer-events-none"
+                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
                   />
                 </div>
               </div>
             );
           })}
-
         </div>
       </div>
     </section>
