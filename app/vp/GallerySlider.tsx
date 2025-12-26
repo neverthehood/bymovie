@@ -195,7 +195,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
           }}
         >
           {looped.map((img, i) => {
-            const isActive = i === activeVisual;
+            const isActive = normalize(i) === normalize(activeVisual);
 
             const w = isActive
               ? isDesktop ? activeWDesktop : activeWMobile
@@ -244,6 +244,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
               </div>
             );
           })}
+
         </div>
       </div>
     </section>
