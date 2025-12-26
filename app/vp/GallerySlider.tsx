@@ -8,166 +8,123 @@ type Slide = {
 };
 
 export default function GallerySlider({ images }: { images: Slide[] }) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const isProgrammatic = useRef(false);
-
   const total = images.length;
   const looped = [...images, ...images, ...images];
-  const baseStart = total;
+  const base = total;
 
-  const [active, setActive] = useState(baseStart);
+  const [active, setActive] = useState(base);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const isDesktop =
+    typeof window !== "undefined" && window.innerWidth >= 768;
+
+  const isIOS =
+    typeof window !== "undefined" &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   // =========================
   // CONFIG
   // =========================
   const gap = 16;
   const snapW = 300;
-  const snapH = 480;
 
-  const scaleActiveDesktop = 1.08;
-  const scaleActiveMobile = 1.06;
-
-  const isDesktop =
-    typeof window !== "undefined" && window.innerWidth >= 768;
+  const scaleActive = isDesktop ? 1.08 : 1.06;
 
   // =========================
-  // INIT CENTER
+  // iOS: translate instead of scroll
   // =========================
   useEffect(() => {
-    const el = scrollerRef.current;
+    if (!isIOS) return;
+    const el = trackRef.current;
     if (!el) return;
-    el.scrollLeft = (snapW + gap) * baseStart;
-  }, [baseStart]);
 
-  // =========================
-  // SCROLL HANDLER
-  // =========================
-  const onScroll = () => {
-    const el = scrollerRef.current;
-    if (!el || isProgrammatic.current) return;
-
-    const center = el.scrollLeft + el.clientWidth / 2;
-
-    let closest = active;
-    let min = Infinity;
-
-    Array.from(el.children).forEach((child, i) => {
-      const c = child as HTMLElement;
-      const childCenter = c.offsetLeft + c.offsetWidth / 2;
-      const dist = Math.abs(center - childCenter);
-
-      if (dist < min) {
-        min = dist;
-        closest = i;
-      }
-    });
-
-    setActive(closest);
-
-    // SAFE LOOP
-    if (closest < baseStart || closest >= baseStart + total) {
-      isProgrammatic.current = true;
-
-      const normalized =
-        baseStart + ((closest - baseStart + total) % total);
-
-      el.scrollLeft = (snapW + gap) * normalized;
-      setActive(normalized);
-
-      requestAnimationFrame(() => {
-        isProgrammatic.current = false;
-      });
-    }
-  };
+    const x = -(active * (snapW + gap));
+    el.style.transform = `translateX(${x}px)`;
+  }, [active, isIOS]);
 
   // =========================
   // CONTROLS
   // =========================
-  const scrollToIndex = (i: number) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-
-    isProgrammatic.current = true;
-
-    el.scrollTo({
-      left: (snapW + gap) * i,
-      behavior: "smooth",
-    });
-
-    setTimeout(() => {
-      isProgrammatic.current = false;
-    }, 350);
+  const next = () => {
+    setActive((i) =>
+      i >= base + total - 1 ? base : i + 1
+    );
   };
 
-  const prev = () => scrollToIndex(active - 1);
-  const next = () => scrollToIndex(active + 1);
+  const prev = () => {
+    setActive((i) =>
+      i <= base ? base + total - 1 : i - 1
+    );
+  };
+
+  // =========================
+  // TOUCH (iOS ONLY)
+  // =========================
+  const touchStart = useRef<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart.current === null) return;
+    const delta =
+      touchStart.current - e.changedTouches[0].clientX;
+
+    if (delta > 50) next();
+    if (delta < -50) prev();
+
+    touchStart.current = null;
+  };
 
   // =========================
   // RENDER
   // =========================
   return (
-    <section className="w-full bg-black py-16 relative">
-      {/* CONTROLS */}
-      <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
-        <button onClick={prev} className="w-11 h-11 rounded-full border border-white/30 text-white">‹</button>
-        <button onClick={next} className="w-11 h-11 rounded-full border border-white/30 text-white">›</button>
-      </div>
-
-      {/* VIEWPORT */}
+    <section className="w-full bg-black py-16 overflow-hidden">
       <div className="relative h-[520px]">
         <div
-          ref={scrollerRef}
-          onScroll={onScroll}
+          ref={trackRef}
+          onTouchStart={isIOS ? onTouchStart : undefined}
+          onTouchEnd={isIOS ? onTouchEnd : undefined}
           className="
-            absolute inset-0
-            flex gap-4 overflow-x-auto
-            snap-x snap-mandatory
-            px-[50vw]
-            scrollbar-none
+            absolute left-1/2 top-1/2
+            flex gap-4
+            transition-transform duration-500 ease-out
+            will-change-transform
           "
+          style={{
+            transform: `translate(-50%, -50%)`,
+          }}
         >
           {looped.map((img, i) => {
             const isActive = i === active;
-            const scale = isActive
-              ? isDesktop
-                ? scaleActiveDesktop
-                : scaleActiveMobile
-              : 1;
 
             return (
               <div
                 key={i}
-                onClick={() => scrollToIndex(i)}
-                className="
-                  snap-center shrink-0
-                  flex items-center justify-center
-                  cursor-pointer
-                "
+                className="flex items-center justify-center"
                 style={{
                   width: snapW,
-                  height: snapH,
                 }}
+                onClick={() => setActive(i)}
               >
                 <div
                   className="
                     w-[220px] h-[320px] md:w-[260px] md:h-[380px]
-                    flex items-center justify-center
                     overflow-hidden
-                    transform-gpu
                     transition-transform duration-500 ease-out
+                    transform-gpu
                   "
                   style={{
-                    transform: `scale(${scale})`,
+                    transform: `scale(${isActive ? scaleActive : 1})`,
                   }}
                 >
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
                     draggable={false}
-                    className="
-                      w-full h-full object-cover
-                      select-none pointer-events-none
-                    "
+                    className="w-full h-full object-cover select-none"
                   />
                 </div>
               </div>
