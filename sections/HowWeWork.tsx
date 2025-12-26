@@ -246,8 +246,14 @@ export default function HowWeWork() {
               {steps.map((s, i) => (
                 <div
                   key={i}
-                  className="w-[40vw] min-w-[40vw] h-[340px] bg-[#DBFE02] px-12 py-12"
+                  className="
+                    w-[40vw] min-w-[40vw] h-[340px]
+                    bg-[#DBFE02]
+                    px-12 py-12
+                    shadow-[0_20px_40px_rgba(0,0,0,0.25)]
+                  "
                 >
+
                   <div className="text-[#101010] h-full flex flex-col items-center justify-center text-center">
                     <div className="opacity-50 mb-3">[{i + 1}]</div>
 
@@ -275,8 +281,14 @@ export default function HowWeWork() {
                   mobileCardsRef.current[i] = el;
                 }}
 
-                className="absolute left-1/2 w-[90vw] max-w-[440px]
-                  -translate-x-1/2 bg-[#D7F000] px-6 py-8"
+                className="
+                  absolute left-1/2 w-[90vw] max-w-[440px]
+                  -translate-x-1/2
+                  bg-[#D7F000]
+                  px-6 py-8
+                  shadow-[0_18px_36px_rgba(0,0,0,0.22)]
+                "
+
               >
                 <div className="text-[#101010] text-center opacity-50 mb-3">
                   [{i + 1}]
