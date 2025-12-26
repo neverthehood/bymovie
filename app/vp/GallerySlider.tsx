@@ -46,7 +46,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // =========================
   // CONFIG
   // =========================
-  const gap = isDesktop ? 16 : 18;
+  const gap = isDesktop ? 16 : 14;
 
   const snapW = 300;
   const snapH = 480;
