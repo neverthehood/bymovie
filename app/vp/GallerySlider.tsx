@@ -11,11 +11,8 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const isProgrammaticScroll = useRef(false);
-  const isLoopJumping = useRef(false);
-
   const rafId = useRef<number | null>(null);
   const endTimer = useRef<number | null>(null);
-
   const pendingIndex = useRef<number | null>(null);
 
   const total = images.length;
@@ -52,6 +49,10 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const activeHMobile = 440;
   const activeWDesktop = 300;
   const activeHDesktop = 480;
+
+  const FINALIZE_DELAY_MOBILE = 480;
+  const FINALIZE_DELAY_DESKTOP = 280;
+  const BUTTON_SCROLL_DELAY = 420;
 
   // =========================
   // INIT CENTER
@@ -90,23 +91,18 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   };
 
   // =========================
-  // FINALIZE — ЕДИНСТВЕННОЕ МЕСТО setActiveVisual
+  // FINALIZE
   // =========================
   const finalize = () => {
     const el = scrollerRef.current;
     if (!el || pendingIndex.current === null) return;
 
     let idx = pendingIndex.current;
-    setActive(idx);
 
     if (idx < total || idx >= total * 2) {
       const target = total + normalize(idx);
-
-      isLoopJumping.current = true;
       isProgrammaticScroll.current = true;
-
       el.scrollLeft = (snapW + gap) * target;
-
       idx = target;
     }
 
@@ -115,12 +111,11 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
     requestAnimationFrame(() => {
       isProgrammaticScroll.current = false;
-      isLoopJumping.current = false;
     });
   };
 
   // =========================
-  // SCROLL — БЕЗ setState
+  // SCROLL
   // =========================
   const onScroll = () => {
     const el = scrollerRef.current;
@@ -134,12 +129,15 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
       pendingIndex.current = findClosestIndex(el);
 
       if (endTimer.current) clearTimeout(endTimer.current);
-      endTimer.current = window.setTimeout(finalize, 260);
+      endTimer.current = window.setTimeout(
+        finalize,
+        isDesktop ? FINALIZE_DELAY_DESKTOP : FINALIZE_DELAY_MOBILE
+      );
     });
   };
 
   // =========================
-  // PROGRAMMATIC
+  // PROGRAMMATIC (BUTTONS / CLICK)
   // =========================
   const scrollToIndex = (i: number) => {
     const el = scrollerRef.current;
@@ -156,19 +154,64 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     setTimeout(() => {
       isProgrammaticScroll.current = false;
       finalize();
-    }, 360);
+    }, BUTTON_SCROLL_DELAY);
   };
+
+  // =========================
+  // CLEANUP
+  // =========================
+  useEffect(() => {
+    return () => {
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      if (endTimer.current) clearTimeout(endTimer.current);
+    };
+  }, []);
 
   // =========================
   // RENDER
   // =========================
   return (
     <section className="w-full bg-black py-16 relative">
+
+      {/* DESKTOP CONTROLS — ВОЗВРАЩЕНЫ */}
+      <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
+        <button
+          onClick={() => scrollToIndex(active - 1)}
+          className="
+            w-11 h-11 rounded-full
+            flex items-center justify-center
+            border border-white/30 text-white
+            hover:border-white hover:bg-white/10
+            transition
+          "
+        >
+          ‹
+        </button>
+        <button
+          onClick={() => scrollToIndex(active + 1)}
+          className="
+            w-11 h-11 rounded-full
+            flex items-center justify-center
+            border border-white/30 text-white
+            hover:border-white hover:bg-white/10
+            transition
+          "
+        >
+          ›
+        </button>
+      </div>
+
       <div className="relative h-[520px]">
         <div
           ref={scrollerRef}
           onScroll={onScroll}
-          className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory px-[50vw] scrollbar-none"
+          className="
+            absolute inset-0
+            flex overflow-x-auto
+            snap-x snap-mandatory
+            px-[50vw]
+            scrollbar-none
+          "
           style={{ gap }}
         >
           {looped.map((img, i) => {
@@ -190,7 +233,10 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
                 style={{ width: snapW, height: snapH }}
               >
                 <div
-                  className="relative bg-black overflow-hidden transition-all duration-300 ease-out"
+                  className="
+                    relative bg-black overflow-hidden
+                    transition-all duration-300 ease-out
+                  "
                   style={{
                     width: w,
                     height: h,
