@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/sections/Hero";
 import Loader from "@/components/Loader";
@@ -11,15 +11,24 @@ import ProjectsSection from "@/sections/ProjectsSection";
 import Footer from "@/sections/Footer";
 
 export default function Page() {
-  const [heroReady, setHeroReady] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
+
+  useEffect(() => {
+    // Loader живёт максимум 1.8s и ВСЁ
+    const t = setTimeout(() => {
+      setShowLoader(false);
+    }, 1800);
+
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <main className="relative w-full bg-black text-white">
       <Navbar />
 
-      {!heroReady && <Loader />}
+      {showLoader && <Loader />}
 
-      <Hero onReady={() => setHeroReady(true)} />
+      <Hero />
 
       <WeAre />
       <ServicesSection />
