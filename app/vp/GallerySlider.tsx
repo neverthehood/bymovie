@@ -13,7 +13,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
   const total = images.length;
   const looped = [...images, ...images, ...images];
-  const baseStart = total; // начало средней копии
+  const baseStart = total;
 
   const [active, setActive] = useState(baseStart);
 
@@ -21,28 +21,21 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // CONFIG
   // =========================
   const gap = 16;
-
   const snapW = 300;
   const snapH = 480;
 
-  const baseW = 220;
-  const baseH = 320;
-
-  const activeWMobile = 280;
-  const activeHMobile = 440;
-  const activeWDesktop = 300;
-  const activeHDesktop = 480;
+  const scaleActiveDesktop = 1.08;
+  const scaleActiveMobile = 1.06;
 
   const isDesktop =
     typeof window !== "undefined" && window.innerWidth >= 768;
 
   // =========================
-  // INIT — jump to middle copy
+  // INIT CENTER
   // =========================
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
-
     el.scrollLeft = (snapW + gap) * baseStart;
   }, [baseStart]);
 
@@ -71,9 +64,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
 
     setActive(closest);
 
-    // =========================
-    // SAFE FAKE LOOP (NO ANIMATION)
-    // =========================
+    // SAFE LOOP
     if (closest < baseStart || closest >= baseStart + total) {
       isProgrammatic.current = true;
 
@@ -90,7 +81,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   };
 
   // =========================
-  // SCROLL TO INDEX (buttons / click)
+  // CONTROLS
   // =========================
   const scrollToIndex = (i: number) => {
     const el = scrollerRef.current;
@@ -116,20 +107,10 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // =========================
   return (
     <section className="w-full bg-black py-16 relative">
-      {/* DESKTOP CONTROLS */}
+      {/* CONTROLS */}
       <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
-        <button
-          onClick={prev}
-          className="w-11 h-11 rounded-full border border-white/30 text-white flex items-center justify-center"
-        >
-          ‹
-        </button>
-        <button
-          onClick={next}
-          className="w-11 h-11 rounded-full border border-white/30 text-white flex items-center justify-center"
-        >
-          ›
-        </button>
+        <button onClick={prev} className="w-11 h-11 rounded-full border border-white/30 text-white">‹</button>
+        <button onClick={next} className="w-11 h-11 rounded-full border border-white/30 text-white">›</button>
       </div>
 
       {/* VIEWPORT */}
@@ -147,41 +128,46 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
         >
           {looped.map((img, i) => {
             const isActive = i === active;
-
-            const innerW = isActive
+            const scale = isActive
               ? isDesktop
-                ? activeWDesktop
-                : activeWMobile
-              : baseW;
-
-            const innerH = isActive
-              ? isDesktop
-                ? activeHDesktop
-                : activeHMobile
-              : baseH;
+                ? scaleActiveDesktop
+                : scaleActiveMobile
+              : 1;
 
             return (
               <div
                 key={i}
                 onClick={() => scrollToIndex(i)}
-                className="snap-center shrink-0 flex items-center justify-center cursor-pointer"
+                className="
+                  snap-center shrink-0
+                  flex items-center justify-center
+                  cursor-pointer
+                "
                 style={{
                   width: snapW,
                   height: snapH,
                 }}
               >
                 <div
-                  className="relative transition-[width,height] duration-300 ease-out"
+                  className="
+                    w-[220px] h-[320px] md:w-[260px] md:h-[380px]
+                    flex items-center justify-center
+                    overflow-hidden
+                    transform-gpu
+                    transition-transform duration-500 ease-out
+                  "
                   style={{
-                    width: innerW,
-                    height: innerH,
+                    transform: `scale(${scale})`,
                   }}
                 >
                   <img
                     src={img.src}
                     alt={img.alt ?? ""}
                     draggable={false}
-                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+                    className="
+                      w-full h-full object-cover
+                      select-none pointer-events-none
+                    "
                   />
                 </div>
               </div>
