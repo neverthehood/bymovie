@@ -13,32 +13,25 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   const total = images.length;
   const looped = [...images, ...images, ...images];
 
-  const [active, setActive] = useState(total);
+  // визуально активный (сразу)
+  const [activeVisual, setActiveVisual] = useState(total);
+  // финальный (после инерции)
+  const [activeFinal, setActiveFinal] = useState(total);
 
-  // =========================
-  // CONFIG
-  // =========================
   const gap = 16;
   const snapW = 300;
   const snapH = 480;
 
-  const baseW = 220;
-  const baseH = 320;
-
-  const activeWMobile = 280;
-  const activeHMobile = 440;
-  const activeWDesktop = 300;
-  const activeHDesktop = 480;
+  const baseScale = 1;
+  const activeScaleMobile = 1.15;
+  const activeScaleDesktop = 1.12;
 
   const isDesktop =
     typeof window !== "undefined" && window.innerWidth >= 768;
 
-  // =========================
-  // INTERNAL LOCKS
-  // =========================
   const rafId = useRef<number | null>(null);
   const scrollEndTimer = useRef<number | null>(null);
-  const isLocked = useRef(false);
+  const lock = useRef(false);
 
   // =========================
   // INIT CENTER
@@ -46,77 +39,79 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
-
     el.scrollLeft = (snapW + gap) * total;
   }, [total]);
 
   // =========================
-  // CORE CALC (SAFE)
+  // FIND CLOSEST
   // =========================
-  const updateActiveSafe = () => {
+  const findClosest = () => {
     const el = scrollerRef.current;
-    if (!el) return;
+    if (!el) return activeVisual;
 
     const center = el.scrollLeft + el.clientWidth / 2;
-
     let closest = 0;
     let min = Infinity;
 
     Array.from(el.children).forEach((child, i) => {
       const c = child as HTMLElement;
-      const childCenter = c.offsetLeft + c.offsetWidth / 2;
-      const dist = Math.abs(center - childCenter);
-
-      if (dist < min) {
-        min = dist;
+      const cCenter = c.offsetLeft + c.offsetWidth / 2;
+      const d = Math.abs(center - cCenter);
+      if (d < min) {
+        min = d;
         closest = i;
       }
     });
 
-    setActive(closest);
-
-    // SAFE LOOP JUMP — ONLY WHEN IDLE
-    if (closest < total || closest >= total * 2) {
-      el.scrollLeft = (snapW + gap) * (total + (closest % total));
-    }
+    return closest;
   };
 
   // =========================
-  // SCROLL HANDLER (iOS SAFE)
+  // SCROLL
   // =========================
   const onScroll = () => {
-    if (isLocked.current) return;
+    if (lock.current) return;
 
-    // cancel previous RAF
     if (rafId.current) cancelAnimationFrame(rafId.current);
 
     rafId.current = requestAnimationFrame(() => {
-      // reset scroll-end timer
-      if (scrollEndTimer.current) {
-        clearTimeout(scrollEndTimer.current);
-      }
+      const closest = findClosest();
 
-      // wait until momentum ends
+      // 🔥 МГНОВЕННЫЙ ВИЗУАЛ
+      setActiveVisual(closest);
+
+      // debounce end
+      if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+
       scrollEndTimer.current = window.setTimeout(() => {
-        isLocked.current = true;
-        updateActiveSafe();
+        lock.current = true;
 
-        // unlock shortly after jump
+        setActiveFinal(closest);
+
+        const el = scrollerRef.current;
+        if (!el) return;
+
+        // SAFE LOOP JUMP
+        if (closest < total || closest >= total * 2) {
+          el.scrollLeft =
+            (snapW + gap) * (total + (closest % total));
+        }
+
         setTimeout(() => {
-          isLocked.current = false;
-        }, 80);
-      }, 120);
+          lock.current = false;
+        }, 60);
+      }, 100);
     });
   };
 
   // =========================
-  // PROGRAMMATIC SCROLL
+  // PROGRAMMATIC
   // =========================
   const scrollToIndex = (i: number) => {
     const el = scrollerRef.current;
     if (!el) return;
 
-    isLocked.current = true;
+    lock.current = true;
 
     el.scrollTo({
       left: (snapW + gap) * i,
@@ -124,20 +119,20 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
     });
 
     setTimeout(() => {
-      updateActiveSafe();
-      isLocked.current = false;
-    }, 400);
+      setActiveVisual(i);
+      setActiveFinal(i);
+      lock.current = false;
+    }, 350);
   };
 
-  const prev = () => scrollToIndex(active - 1);
-  const next = () => scrollToIndex(active + 1);
+  const prev = () => scrollToIndex(activeFinal - 1);
+  const next = () => scrollToIndex(activeFinal + 1);
 
   // =========================
   // RENDER
   // =========================
   return (
     <section className="w-full bg-black py-16 relative">
-      {/* DESKTOP CONTROLS */}
       <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
         <button onClick={prev} className="w-11 h-11 border border-white/30 text-white rounded-full">‹</button>
         <button onClick={next} className="w-11 h-11 border border-white/30 text-white rounded-full">›</button>
@@ -156,34 +151,38 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
           "
         >
           {looped.map((img, i) => {
-            const isActive = i === active;
+            const isActive = i === activeVisual;
 
-            const innerW = isActive
-              ? isDesktop ? activeWDesktop : activeWMobile
-              : baseW;
-
-            const innerH = isActive
-              ? isDesktop ? activeHDesktop : activeHMobile
-              : baseH;
+            const scale = isActive
+              ? isDesktop
+                ? activeScaleDesktop
+                : activeScaleMobile
+              : baseScale;
 
             return (
               <div
                 key={i}
                 onClick={() => scrollToIndex(i)}
-                className="snap-center shrink-0 flex items-center justify-center cursor-pointer"
+                className="snap-center shrink-0 flex items-center justify-center"
                 style={{ width: snapW, height: snapH }}
               >
-                <div
-                  className="relative overflow-hidden transition-all duration-300 ease-out"
-                  style={{ width: innerW, height: innerH }}
-                >
-                  <img
-                    src={img.src}
-                    alt={img.alt ?? ""}
-                    draggable={false}
-                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-                  />
-                </div>
+                <img
+                  src={img.src}
+                  alt={img.alt ?? ""}
+                  draggable={false}
+                  className="
+                    block
+                    w-full h-full
+                    object-cover
+                    bg-black
+                    select-none
+                    pointer-events-none
+                    transition-transform duration-200 ease-out
+                  "
+                  style={{
+                    transform: `scale(${scale})`,
+                  }}
+                />
               </div>
             );
           })}
