@@ -203,7 +203,7 @@ export default function GallerySlider({ images }: { images: Slide[] }) {
   // RENDER
   // =========================
   return (
-    <section className="w-full bg-black py-16 relative">
+    <section className="w-full bg-black py-16 relative overflow-x-hidden">
       {/* DESKTOP CONTROLS */}
       <div className="hidden md:flex absolute top-6 right-6 z-20 gap-3">
         <button
