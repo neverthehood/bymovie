@@ -14,7 +14,6 @@ export default function ServicesSection() {
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  // mobile progress (0 → services.length)
   const mobileProgressRef = useRef(0);
 
   // detect mobile
@@ -26,7 +25,7 @@ export default function ServicesSection() {
   }, []);
 
   //
-  // MAIN SCROLL HANDLER
+  // MAIN SCROLL HANDLER — НЕ ТРОГАЕМ
   //
   useEffect(() => {
     const handler = () => {
@@ -40,30 +39,28 @@ export default function ServicesSection() {
       let idx = active;
 
       if (isMobile) {
-        // ===== MOBILE — CORRECT LOGIC =====
         const sectionHeight = sec.offsetHeight;
         const scrollInside = scrollY - sectionTop;
 
-        const normalized =
-          scrollInside / (sectionHeight - vh);
+        const normalizedRaw = scrollInside / (sectionHeight - vh);
+        const normalized = Math.max(0, Math.min(1, normalizedRaw));
 
-        const targetProgress =
-          normalized * services.length;
+        const targetProgress = normalized * services.length;
 
-        const SMOOTHING = 0.058; // спокойствие
+        const SMOOTHING = 0.058;
         mobileProgressRef.current +=
           (targetProgress - mobileProgressRef.current) * SMOOTHING;
 
         idx = Math.floor(mobileProgressRef.current);
 
-        // удерживаем последний пункт
         if (idx >= services.length - 1) {
           idx = services.length - 1;
           mobileProgressRef.current = services.length - 1;
         }
       } else {
-        // ===== DESKTOP — НЕ ТРОГАЕМ =====
-        const rawProgress = (scrollY - sectionTop) / vh * 4;
+        const rawProgress =
+          ((scrollY - sectionTop) / vh) * services.length;
+
         idx = Math.floor(rawProgress);
       }
 
@@ -126,7 +123,7 @@ export default function ServicesSection() {
           {services.map((s, i) => (
             <img
               key={i}
-              src={s.img}
+              src={isMobile ? s.imgMobile || s.img : s.img}
               alt={s.title}
               className="h-screen w-full object-cover flex-shrink-0"
             />
@@ -165,7 +162,7 @@ export default function ServicesSection() {
           </>
         )}
 
-        {/* ===== MOBILE — FIXED ===== */}
+        {/* ===== MOBILE — НЕ ТРОГАЕМ ===== */}
         {isMobile && (
           <div className="absolute inset-0 p-6 z-20 flex flex-col justify-end">
             <div className="flex flex-col gap-6 opacity-90 mb-14">

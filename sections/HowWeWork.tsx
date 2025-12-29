@@ -149,7 +149,7 @@ export default function HowWeWork() {
 
     const FIRST_TOP_VH = 0.32;
     const CARD_H_VH = 0.35;
-    const OVERLAP = 0.35;
+    const OVERLAP = 0.45;
     const EXTRA_BOTTOM = 0.25;
 
     const recompute = () => {
