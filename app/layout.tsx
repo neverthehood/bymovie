@@ -6,9 +6,10 @@ const anybody = Anybody({
   subsets: ["latin"],
   weight: ["300", "400", "600", "800", "900"],
   variable: "--font-anybody",
-  display: "swap",
-  preload: true,
+  display: "swap", 
+  preload: true,   
 });
+
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bymovie.studio"),
@@ -20,15 +21,6 @@ export const metadata: Metadata = {
 
   description:
     "BY MOVIE is a virtual production studio specializing in LED walls, Unreal Engine, and real-time virtual environments.",
-
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    viewportFit: "cover",
-  },
-
-  themeColor: "#000000",
 
   icons: {
     icon: "/fi.png",
@@ -73,8 +65,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="overflow-x-hidden">
-      <body className={`${anybody.variable} font-anybody antialiased overflow-x-hidden`}>
+    <html lang="en">
+      <body className={`${anybody.variable} font-anybody antialiased`}>
         {children}
       </body>
     </html>

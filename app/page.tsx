@@ -14,26 +14,20 @@ export default function Page() {
   const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
-    // Loader максимум 700ms — дальше не мешаем LCP
+    // Loader живёт максимум 1.8s и ВСЁ
     const t = setTimeout(() => {
       setShowLoader(false);
-    }, 700);
+    }, 1800);
 
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <main className="relative w-full bg-black text-white overflow-x-hidden">
+    <main className="relative w-full bg-black text-white">
       <Navbar />
 
-      {/* Loader — OVERLAY, не блокирует layout */}
-      {showLoader && (
-        <div className="fixed inset-0 z-[9999] pointer-events-none">
-          <Loader />
-        </div>
-      )}
+      {showLoader && <Loader />}
 
-      {/* Hero = LCP */}
       <Hero />
 
       <WeAre />
