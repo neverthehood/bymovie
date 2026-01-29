@@ -6,81 +6,52 @@ import Loader from "@/components/Loader";
 import Link from "next/link";
 
 export default function Hero() {
-  const [progress, setProgress] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const progressRef = useRef(0);
-
-  // =========================
-  // VIDEO LOAD DETECTION
-  // =========================
+  // когда видео готово → завершаем loader
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    if (!videoReady) return;
 
-    const handleLoaded = () => {
-      setVideoReady(true);
-    };
+    const timeout = setTimeout(() => {
+      setLoaded(true);
+    }, 400); // лёгкая пауза чтобы красиво завершился loader
 
-    video.addEventListener("loadeddata", handleLoaded);
-
-    return () => {
-      video.removeEventListener("loadeddata", handleLoaded);
-    };
-  }, []);
-
-  // =========================
-  // PROGRESS SIMULATION
-  // =========================
-  useEffect(() => {
-    let raf: number;
-
-    const animate = () => {
-      if (progressRef.current < 90) {
-        progressRef.current += 0.8; // стартует сразу
-      }
-
-      if (videoReady && progressRef.current < 100) {
-        progressRef.current += 2.5; // ускорение к финалу
-      }
-
-      if (progressRef.current >= 100) {
-        progressRef.current = 100;
-        setProgress(100);
-        setLoaded(true);
-        return;
-      }
-
-      setProgress(progressRef.current);
-      raf = requestAnimationFrame(animate);
-    };
-
-    raf = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(raf);
+    return () => clearTimeout(timeout);
   }, [videoReady]);
 
-  // StrictMode fix
+  // StrictMode safe
   useEffect(() => {
     if (!loaded) return;
     const id = requestAnimationFrame(() => setIsReady(true));
     return () => cancelAnimationFrame(id);
   }, [loaded]);
 
-  // =========================
-  // DESKTOP ANIMATION (оставляем как было)
-  // =========================
+  // ============================
+  // REFS (не меняем)
+  // ============================
+
   const topMaskRef = useRef<HTMLDivElement | null>(null);
   const bottomMaskRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const mTopMask = useRef<HTMLDivElement | null>(null);
+  const mBottomMask = useRef<HTMLDivElement | null>(null);
+  const mTitle = useRef<HTMLHeadingElement | null>(null);
+  const mButton = useRef<HTMLButtonElement | null>(null);
+
+  // ============================
+  // DESKTOP ANIMATION
+  // ============================
 
   useLayoutEffect(() => {
     if (!isReady) return;
 
     const ctx = gsap.context(() => {
+      if (!topMaskRef.current || !bottomMaskRef.current) return;
+
       gsap.set(topMaskRef.current, { yPercent: 30 });
       gsap.set(bottomMaskRef.current, { yPercent: -30 });
 
@@ -99,40 +70,89 @@ export default function Hero() {
         .fromTo(
           titleRef.current,
           { autoAlpha: 0, y: 40 },
-          { autoAlpha: 1, y: 0, duration: 0.6 },
+          { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" },
           "-=0.5"
+        )
+        .fromTo(
+          buttonRef.current,
+          { autoAlpha: 0, y: 20 },
+          { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" },
+          "-=0.3"
         );
     });
 
     return () => ctx.revert();
   }, [isReady]);
 
-  // =========================
+  // ============================
+  // MOBILE ANIMATION
+  // ============================
+
+  useLayoutEffect(() => {
+    if (!isReady) return;
+
+    const ctx = gsap.context(() => {
+      if (!mTopMask.current || !mBottomMask.current) return;
+
+      gsap.set(mTopMask.current, { yPercent: 25 });
+      gsap.set(mBottomMask.current, { yPercent: -25 });
+
+      const tl = gsap.timeline();
+
+      tl.to(mTopMask.current, {
+        yPercent: -30,
+        duration: 1.2,
+        ease: "power3.inOut",
+      }, 0)
+        .to(mBottomMask.current, {
+          yPercent: 30,
+          duration: 1.2,
+          ease: "power3.inOut",
+        }, 0)
+        .fromTo(
+          mTitle.current,
+          { autoAlpha: 0, y: 30 },
+          { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" },
+          "-=0.4"
+        )
+        .fromTo(
+          mButton.current,
+          { autoAlpha: 0, y: 15 },
+          { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" },
+          "-=0.3"
+        );
+    });
+
+    return () => ctx.revert();
+  }, [isReady]);
+
+  // ============================
   // RENDER
-  // =========================
+  // ============================
+
   return (
     <>
-      {!loaded && <Loader progress={progress} />}
+      {!loaded && <Loader />}
 
       <section
-        className={`
-          relative w-full overflow-hidden bg-black
-          transition-opacity duration-700
-          ${loaded ? "opacity-100" : "opacity-0"}
-        `}
+        className={`relative w-full overflow-hidden bg-black transition-opacity duration-700 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
       >
-        <div className="relative h-screen w-full overflow-hidden">
-
+        {/* DESKTOP */}
+        <div className="hidden md:block relative h-screen w-full overflow-hidden">
           <video
-            ref={videoRef}
             autoPlay
             loop
             muted
             playsInline
-            preload="auto"
+            onLoadedData={() => setVideoReady(true)}
             className="absolute inset-0 h-full w-full object-cover"
           >
-            <source src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Show_fin.webm" type="video/webm" />
+            <source
+              src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Show_fin.webm"
+              type="video/webm"
+            />
           </video>
 
           <div className="absolute inset-0 bg-black/40" />
@@ -141,24 +161,31 @@ export default function Hero() {
             <h1
               ref={titleRef}
               className="font-anybody text-center font-extrabold uppercase leading-[0.9]
-                text-white text-[40px] sm:text-[64px] md:text-[88px]"
+                text-white text-[40px] sm:text-[64px] md:text-[88px] lg:text-[110px]
+                xl:text-[130px] max-w-[1600px] mx-auto"
             >
-              THE FUTURE OF MEDIA PRODUCTION IS ALREADY HERE
+              <span className="block">THE FUTURE OF</span>
+              <span className="block">MEDIA PRODUCTION</span>
+              <span className="block">IS ALREADY HERE</span>
             </h1>
           </div>
+        </div>
 
-          <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
-            <div
-              ref={topMaskRef}
-              className="absolute left-1/2 -translate-x-1/2 top-[-30vh]
-                w-[220vw] h-[80vh] bg-black rounded-b-[40%]"
+        {/* MOBILE */}
+        <div className="block md:hidden relative h-screen w-full overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            onLoadedData={() => setVideoReady(true)}
+            className="absolute inset-0 h-full w-full object-cover"
+          >
+            <source
+              src="https://pub-6b170c422cda4d44a90de5f670525527.r2.dev/Show_fin_mobile.webm"
+              type="video/webm"
             />
-            <div
-              ref={bottomMaskRef}
-              className="absolute left-1/2 -translate-x-1/2 bottom-[-30vh]
-                w-[220vw] h-[80vh] bg-black rounded-t-[40%]"
-            />
-          </div>
+          </video>
         </div>
       </section>
     </>
